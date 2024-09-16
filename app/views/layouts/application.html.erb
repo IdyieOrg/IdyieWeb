@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Web</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+
+    <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+    <%= javascript_importmap_tags %>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.10/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.10/vfs_fonts.min.js"></script>
+  </head>
+
+  <body class="dark">
+    <div class="container-fluid h-100" style="position: absolute">
+      <div class="row h-100">
+        <div class="col-2" style="background-color: #323232; padding: 0; margin: 0">
+        </div>
+        <div class="col-10" style="position: relative; padding: 0; margin: 0">
+          <%= yield %>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

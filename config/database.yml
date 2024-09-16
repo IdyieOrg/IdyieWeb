@@ -1,0 +1,19 @@
+default: &default
+  adapter: mysql2
+  encoding: utf8mb4
+  pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
+  username: root
+  password: password
+  host: idyie-web-mariadb
+
+development:
+  <<: *default
+  database: idyie_web_development
+
+test:
+  <<: *default
+  database: idyie_web_test
+
+production:
+  <<: *default
+  database: idyie_web_production

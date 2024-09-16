@@ -1,0 +1,165 @@
+<%#= select_tag "search[select]", options_for_select(
+  [
+    "Fais-moi un bilan comptable sous forme de barre pour le groupe X",
+    "Fais en sorte que le débit soit en rouge et le crédit en vert",
+    "Fais-moi un tableau que je pourrais exporter sous différents formats"
+  ]
+), { class: "select2", style: "width: 100%;" } %>
+
+<div class="bottom-fixed" style="display: flex; flex-direction: row; justify-content: space-around; align-items: center; position: absolute; bottom: 0; width: 100%; margin-bottom: 10px;">
+  <div style="position: relative; width: 90%;">
+    <%= text_field_tag "search[query]", nil, class: "form-control", style: "width: 100%; border-radius: 15px; padding-right: 40px; position: relative;" %>
+    <i class="fas fa-microphone" style="position: absolute; right: 2%; top: 50%; transform: translateY(-50%); cursor: pointer;" id="microphone"></i>
+  </div>
+  <%= button_tag "Envoyer", type: "submit", id: "prompt", class: "btn btn-success" %>
+</div>
+
+<div id="result"></div>
+
+<script type="module">
+  import "vendor/chart"
+  import "vendor/html2canvas"
+  import "vendor/jspdf"
+  import "vendor/select2"
+
+  import { initDataTable } from "lib/dataTables"
+  function generateDownloadButton() {
+    $("#result").append("<button class='btn btn-dark' id='download' style='color: #00bf63'><i class='fa fa-file-pdf'></i> Télécharger</button>");
+
+    $("#download").click(function() {
+      html2canvas(document.querySelector("#myChart"), { scale: 2 }).then(canvas => {
+        const imgData = canvas.toDataURL('image/png');
+        const pdf = new jspdf.jsPDF('landscape');
+        pdf.addImage(imgData, 'PNG', 10, 10, 280, 160);
+        pdf.save("download.pdf");
+      });
+    });
+  }
+
+  function generateBarChart(content)
+  {
+    $("#result").html("<canvas id='myChart'></canvas>");
+
+    const ctx = document.getElementById('myChart').getContext('2d');
+    const myChart = new Chart(ctx, content);
+
+    generateDownloadButton();
+  }
+
+  function generateDataTable(content)
+  {
+    let table = "<table id='myTable'>";
+    table += "<thead><tr>";
+    for (let i = 0; i < content.columns.length; i++) {
+      table += "<th>" + content.columns[i] + "</th>";
+    }
+    table += "</tr></thead><tbody>";
+
+    for (let i = 0; i < content.rows.length; i++) {
+      table += "<tr>";
+      for (let j = 0; j < content.rows[i].length; j++) {
+        table += "<td>" + content.rows[i][j] + "</td>";
+      }
+      table += "</tr>";
+    }
+    table += "</tbody></table>";
+
+    $("#result").html(table);
+
+    initDataTable("myTable");
+  }
+
+  function treatResponse(response = [])
+  {
+    if (!response || response.length === 0) {
+      $("#result").html("<p>Aucun résultat</p>");
+      return;
+    }
+
+    let data = JSON.parse(response.data);
+    if (!data || data.length === 0) {
+      $("#result").html("<p>Aucun résultat</p>");
+      return;
+    }
+
+    const dataType = data.data_type;
+    if (dataType === "barChart") {
+      generateBarChart(data.content);
+    } else if (dataType === "table") {
+      generateDataTable(data.content);
+    } else {
+      $("#result").html("<p>Aucun résultat</p>");
+    }
+  }
+
+  function callAjax(query = "")
+  {
+    if (query === "") {
+      $("#result").html("<p>Aucun résultat</p>");
+      return;
+    }
+
+    $.ajax({
+      headers:
+      {
+        "X-CSRF-Token": $('meta[name="csrf-token"]').attr('content')
+      },
+      url: "<%= url_for(controller: 'prompts', action: 'send_to_api') %>",
+      type: "POST",
+      data: { query: query },
+      success: function (response) {
+        $("input[name='search[query]']").val("");
+        treatResponse(response);
+      },
+      error: function (response) {
+        console.log("Error: " + response);
+      }
+    })
+  }
+
+  function getQueryAndCall()
+  {
+    let query = $("input[name='search[query]']").val();
+    callAjax(query);
+  }
+
+  $(document).ready(function() {
+    $("#prompt").click(function() {
+      getQueryAndCall();
+    });
+  });
+
+  if ('webkitSpeechRecognition' in window) {
+    const recognition = new webkitSpeechRecognition();
+    recognition.continuous = false;
+    recognition.interimResults = false;
+    recognition.lang = 'fr-FR';
+
+    recognition.onstart = function() {
+      console.log('Reconnaissance vocale démarrée');
+      $(".fa-microphone").css("color", "red");
+    };
+
+    recognition.onresult = function(event) {
+      const transcript = event.results[0][0].transcript;
+      $("input[name='search[query]']").val(transcript);
+      console.log('Transcription : ', transcript);
+    };
+
+    recognition.onerror = function(event) {
+      console.error('Erreur de reconnaissance vocale : ', event.error);
+    };
+
+    recognition.onend = function() {
+      console.log('Reconnaissance vocale terminée');
+      $(".fa-microphone").css("color", "green");
+    };
+
+    document.getElementById('microphone').addEventListener('click', function() {
+      recognition.start();
+    });
+  } else {
+    console.error('L\'API Web Speech n\'est pas supportée par ce navigateur.');
+    alert('L\'API Web Speech n\'est pas supportée par ce navigateur.');
+  }
+</script>

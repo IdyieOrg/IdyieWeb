@@ -1,0 +1,27 @@
+require:
+  - rubocop-rails
+  - rubocop-rspec
+  - ./lib/rubocop/cop/custom/finder_rule.rb
+
+AllCops:
+  NewCops: enable
+  SuggestExtensions: false
+  Exclude:
+    - 'bin/*'
+    - 'config/environments/*.rb'
+    - 'db/schema.rb'
+
+Style/BlockComments:
+  Enabled: false
+
+Style/Documentation:
+  Enabled: false
+
+Style/FrozenStringLiteralComment:
+  Enabled: false
+
+Style/SymbolArray:
+  Enabled: false
+
+Custom/FinderRule:
+  Enabled: true

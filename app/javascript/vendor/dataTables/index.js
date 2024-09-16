@@ -1,0 +1,6 @@
+import "vendor/dataTables/dataTables"
+import "vendor/dataTables/buttons"
+import "vendor/dataTables/buttons.colVis"
+import "vendor/dataTables/buttons.html5"
+import "vendor/dataTables/buttons.print"
+import "vendor/dataTables/jszip"
