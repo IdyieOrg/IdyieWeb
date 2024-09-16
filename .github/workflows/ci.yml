@@ -42,11 +42,23 @@ jobs:
 
       - name: Build Docker images
         run: docker compose build
+        env:
+          MYSQL_DATABASE: ${{ secrets.MYSQL_DATABASE }}
+          MYSQL_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
+          MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
+          MYSQL_USER: ${{ secrets.MYSQL_USER }}
+          PORT: ${{ secrets.PORT }}
 
   test:
     name: Run RSpec tests
     runs-on: ubuntu-latest
     needs: build
+    env:
+      MYSQL_DATABASE: ${{ secrets.MYSQL_DATABASE }}
+      MYSQL_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
+      MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
+      MYSQL_USER: ${{ secrets.MYSQL_USER }}
+      PORT: ${{ secrets.PORT }}
     services:
       docker:
         image: docker:latest
