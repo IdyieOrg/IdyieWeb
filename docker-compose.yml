@@ -7,6 +7,8 @@ services:
     environment:
       IDYIE_API_URL: $IDYIE_API_URL
       PORT: $PORT
+      RAILS_ENV: $RAILS_ENV
+      SECRET_KEY_BASE: $SECRET_KEY_BASE
     networks:
       - idyie-network
     ports:
@@ -30,8 +32,6 @@ services:
       - idyie-web-mariadb:/var/lib/mysql
 
 networks:
-  default:
-    driver: bridge
   idyie-network:
     external: true
     name: idyie-network

@@ -1,7 +1,6 @@
 require:
   - rubocop-rails
   - rubocop-rspec
-  - ./lib/rubocop/cop/custom/finder_rule.rb
 
 AllCops:
   NewCops: enable
@@ -22,6 +21,3 @@ Style/FrozenStringLiteralComment:
 
 Style/SymbolArray:
   Enabled: false
-
-Custom/FinderRule:
-  Enabled: true
