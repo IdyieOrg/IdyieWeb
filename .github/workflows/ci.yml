@@ -94,7 +94,7 @@ jobs:
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v5
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.ACTIONS_DEPLOY_TOKEN }}
           branch: prod
           commit-message: 'Automated merge from main to prod'
           title: 'Merge main into prod'
