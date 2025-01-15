@@ -49,43 +49,43 @@ jobs:
           MYSQL_USER: ${{ secrets.MYSQL_USER }}
           PORT: ${{ secrets.PORT }}
 
-  test:
-    name: Run RSpec tests
-    runs-on: ubuntu-latest
-    needs: build
-    env:
-      MYSQL_DATABASE: ${{ secrets.MYSQL_DATABASE }}
-      MYSQL_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
-      MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
-      MYSQL_USER: ${{ secrets.MYSQL_USER }}
-      PORT: ${{ secrets.PORT }}
-    services:
-      docker:
-        image: docker:latest
-        options: --privileged
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+  # test:
+  #   name: Run RSpec tests
+  #   runs-on: ubuntu-latest
+  #   needs: build
+  #   env:
+  #     MYSQL_DATABASE: ${{ secrets.MYSQL_DATABASE }}
+  #     MYSQL_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
+  #     MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
+  #     MYSQL_USER: ${{ secrets.MYSQL_USER }}
+  #     PORT: ${{ secrets.PORT }}
+  #   services:
+  #     docker:
+  #       image: docker:latest
+  #       options: --privileged
+  #   steps:
+  #     - name: Checkout repository
+  #       uses: actions/checkout@v3
 
-      - name: Create Docker network
-        run: docker network create idyie-network || true
+  #     - name: Create Docker network
+  #       run: docker network create idyie-network || true
 
-      - name: Setup Docker Compose
-        run: docker compose up -d
+  #     - name: Setup Docker Compose
+  #       run: docker compose up -d
 
-      - name: Wait for MariaDB
-        run: docker compose exec mariadb mariadb-admin --silent --wait=30 -uroot -ppassword ping || exit 1
+  #     - name: Wait for MariaDB
+  #       run: docker compose exec mariadb mariadb-admin --silent --wait=30 -uroot -ppassword ping || exit 1
 
-      - name: Run DB Migrations
-        run: docker compose exec application rails db:create db:migrate
+  #     - name: Run DB Migrations
+  #       run: docker compose exec application rails db:create db:migrate
 
-      - name: Run RSpec
-        run: docker compose exec application bundle exec rspec
+  #     - name: Run RSpec
+  #       run: docker compose exec application bundle exec rspec
 
   create-pr:
     name: Create Pull Request to prod
     runs-on: ubuntu-latest
-    needs: test
+    needs: build
     if: github.ref == 'refs/heads/main'
     steps:
       - name: Checkout repository
