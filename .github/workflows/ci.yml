@@ -81,3 +81,21 @@ jobs:
 
       - name: Run RSpec
         run: docker compose exec application bundle exec rspec
+
+  create-pr:
+    name: Create Pull Request to prod
+    runs-on: ubuntu-latest
+    needs: test
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: prod
+          commit-message: 'Automated merge from main to prod'
+          title: 'Merge main into prod'
+          body: 'This PR merges the latest changes from main into prod.'
