@@ -32,6 +32,8 @@ services:
       - idyie-web-mariadb:/var/lib/mysql
 
 networks:
+  default:
+    driver: bridge
   idyie-network:
     external: true
     name: idyie-network
