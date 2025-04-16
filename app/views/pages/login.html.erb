@@ -1,0 +1,53 @@
+<div class="login-page">
+  <div class="login-container">
+
+    <div class="title">
+      <h1 style="font-size:175%;">Welcome to</h1>
+      <h1 class="fondamento-regular title">Idyie</h1>
+    </div>
+    
+    <%= form_tag "#", method: :post do %>
+      <div class="form-group">
+        <%= label_tag :username, "Username" %>
+        <%= email_field_tag :username, nil, class: "input", placeholder: "firstname.lastname@mail.com", required: true %>
+      </div>
+
+      <div class="form-group">
+        <%= label_tag :password, "Password" %>
+        <div class="password-container">
+          <%= password_field_tag :password, nil, class: "input", placeholder: "password", id: "password", required: true %>
+          <i class="eye-icon" id="togglePassword">&#128065;</i>
+        </div>
+      </div>
+
+      <div style="padding: 20px"></div>
+      
+      <div class="form-group">
+        <%= link_to "/prompts", class: "custom-btn login-btn" do %>
+          Sign in
+        <% end %>
+
+        <div class="divider">OR</div>
+
+        <%= button_tag type: "button", class: "custom-btn login-btn" do %>
+          Register
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+</div>
+
+<script>
+  document.getElementById('togglePassword').addEventListener('click', function() {
+    var passwordField = document.getElementById('password');
+    var eyeIcon = document.getElementById('togglePassword');
+
+    if (passwordField.type === "password") {
+      passwordField.type = "text";
+      eyeIcon.style.color = "#7FFFAB";
+    } else {
+      passwordField.type = "password";
+      eyeIcon.style.color = "#7D7D7D";
+    }
+  });
+</script>

@@ -1,0 +1,141 @@
+.login-page {
+  background-color: #000; 
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  width: 100%;
+}
+
+.login-container {
+  width: 100%;
+  max-width: 450px;
+  text-align: center;
+  background-color: #111;
+  border-radius: 10px;
+  box-shadow: 0px 0px 15px #7FFFAB;
+  padding: 30px;
+}
+
+.title {
+  font-size:200%;
+  color: #7FFFAB;
+  margin-bottom: 40px;
+}
+
+.fondamento-regular {
+  font-family: "Fondamento", serif;
+  font-weight: 400;
+  font-style: normal;
+}
+
+.form-group {
+  position: relative;
+  margin-bottom: 15px;
+  text-align: left;
+  padding-left: 20px;
+  padding-right: 20px;
+}
+
+.form-group:focus-within label {
+  color: #7FFFAB;
+}
+
+label {
+  margin-bottom: 5px;
+  font-size: 13px;
+  color: #7D7D7D;
+}
+
+.input {
+  width: 100%;
+  padding: 15px;
+  border: 2px solid #7D7D7D;
+  border-radius: 5px;
+  background: #2c2c2c;
+  font-size: 14px;
+  outline: none;
+  color: white;
+  
+  &::placeholder {
+    color: white;
+    opacity: 0.8;
+  }
+
+  &:focus {
+    border-color: #7FFFAB;
+  }
+}
+
+.password-container {
+  position: relative;
+  width: 100%;
+}
+
+.eye-icon {
+  position: absolute;
+  top: 25%;
+  right: 15px;
+  font-size: 18px;
+  color: #7D7D7D;
+  transition: color 0.3s ease;
+}
+
+.divider {
+  margin: 20px 0;
+  text-align: center;
+  color: #7D7D7D;
+  font-size: 12px;
+  position: relative;
+}
+
+.divider:before,
+.divider:after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: 40%;
+  height: 1px;
+  background-color: #7D7D7D;
+}
+
+.divider:before {
+  left: 0;
+}
+
+.divider:after {
+  right: 0;
+}
+
+.custom-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #1d1d1d;
+  border: 1px solid #7FFFAB;
+  border-radius: 5px;
+  color: #7FFFAB;
+  padding: 10px;
+  text-decoration: none;
+  width: 10%;
+  height: 100%;
+}
+
+.custom-btn:hover {
+  background-color: #146c43;
+  color: white;
+  border: 1px solid #198754;
+  transform: scale(1.02);
+  box-shadow: 0px 6px 10px rgba(0, 0, 0, 0.2);
+}
+
+.custom-btn:active {
+  transform: scale(1);
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.login-btn {
+  width: 100%;
+  padding: 15px;
+  font-size: 16px;
+}

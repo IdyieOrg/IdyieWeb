@@ -1,0 +1,430 @@
+<%#= select_tag "search[select]", options_for_select(
+  [
+    "Fais-moi un bilan comptable sous forme de barre pour le groupe X",
+    "Fais en sorte que le débit soit en rouge et le crédit en vert",
+    "Fais-moi un tableau que je pourrais exporter sous différents formats"
+  ]
+), { class: "select2", style: "width: 100%;" } %>
+
+<div id="main" class="bottom-fixed main-container">
+  <div id="sidebar" class="bg-dark text-white p-3 position-fixed sidebar">
+    <h2 class="text-center fondamento-regular">Idyie</h2>
+    <hr class="bg-light">
+    
+    <ul class="nav flex-column">
+      <li class="nav-item">
+        <%= link_to "#", class: "nav-link text-white" do %>
+          <i class="fas fa-plus"></i> Nouvelle Requête
+        <% end %>
+      </li>
+      <li class="nav-item">
+        <%= link_to "#", class: "nav-link text-white" do %>
+          <i class="fas fa-history"></i> Historique
+        <% end %>
+      </li>
+      <li class="nav-item">
+        <%= link_to "#", id: "openSettingsModal", class: "nav-link text-white" do %>
+          <i class="fas fa-cog"></i> Paramètres
+        <% end %>
+      </li>
+    </ul>
+    
+    <hr class="bg-light mt-auto">
+    
+    <%= link_to "/", class: "btn btn-danger w-100" do %>
+      <i class="fas fa-sign-out-alt"></i> Déconnexion
+    <% end %>
+  </div>
+  
+  <button id="toggleSidebar" class="btn btn-dark position-fixed" style="top: 20px; left: 20px; z-index: 1000;">
+    <i id="sidebarIcon" class="fas fa-bars"></i>
+  </button>
+
+  <div class="chat-container">
+    <div id="chat-box" class="chat-box"></div>
+
+    <div class="d-flex justify-content-center" style="width: 100%; padding: 20px;">
+      <div class="content d-flex align-items-center gap-2 p-3" style="background-color: #2c2c2c; border-radius: 10px; width: 100%; height: 90%">
+        <i id="microphone" class="fas fa-microphone" style="cursor: pointer; color: white; font-size: 24px; width: 5%;"></i>
+        <%= text_field_tag "search[query]", nil, class: "input", placeholder: "Tapez votre requête ici" %>
+        <%= button_tag "Envoyer", type: "submit", id: "prompt", class: "btn btn-success custom-btn", style: "height: 110%;" %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="settingsModal" class="modal fade" tabindex="-1" aria-labelledby="settingsModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-xl">
+    <div class="modal-content" style="border-radius: 15px; background-color: #2c2c2c; color: white;">
+      <div class="modal-header" style="border-bottom: 1px solid #555;">
+        <h5 class="modal-title" id="settingsModalLabel" style="color: #fff;">Paramètres</h5>
+        <%= button_tag "", type: "button", class: "btn-close", data: { bs_dismiss: "modal" }, aria: { label: "Close" }, style: "filter: invert(1);" %>
+      </div>
+      <div class="modal-body">
+        <div class="row">
+          <div class="col-md-4" style="border-right: 1px solid #555;">
+            <ul class="nav flex-column nav-pills settings-menu" id="settingsMenu">
+              <li class="nav-item">
+                <%= link_to 'Profil', '#profile-settings', class: 'nav-link active', data: { bs_target: '#profile-settings', bs_toggle: 'pill' } %>
+              </li>
+              <li class="nav-item">
+                <%= link_to 'Général', '#general-settings', class: 'nav-link', data: { bs_target: '#general-settings', bs_toggle: 'pill' } %>
+              </li>
+              <li class="nav-item">
+                <%= link_to 'Personnalisation', '#customization-settings', class: 'nav-link', data: { bs_target: '#customization-settings', bs_toggle: 'pill' } %>
+              </li>
+            </ul>
+
+          </div>
+
+          <div class="col-md-8">
+            <div class="tab-content">
+              <div class="tab-pane fade show active" id="profile-settings">
+                <h5>Profil</h5>
+
+                <div class="d-flex align-items-center mb-3">
+                  <%= image_tag "/logo_idyie.png", id: "profileImage", class: "rounded-circle", width: 100, height: 100, style: "object-fit: cover;" %>
+                  
+                  <div class="ms-3">
+                    <%= label_tag :profile_pic, "Changer", class: "btn btn-outline-light btn-sm", for: "profilePicUpload" %>
+                    <%= file_field_tag :profile_pic, id: "profilePicUpload", accept: "image/*", class: "d-none" %>
+                  </div>
+                </div>
+
+                <div class="mb-3">
+                  <%= label_tag :username, "Nom d'utilisateur", class: "form-label" %>
+                  <%= text_field_tag :username, "MonPseudo", class: "form-control", style: "background-color: #444; color: white; border: none;" %>
+                </div>
+
+                <div class="mb-3">
+                  <%= label_tag :email, "Email", class: "form-label" %>
+                  <%= email_field_tag :email, "exemple@email.com", class: "form-control", style: "background-color: #444; color: white; border: none;" %>
+                </div>
+              </div>
+
+              <div class="tab-pane fade" id="general-settings">
+                <h5>Général</h5>
+
+                <div class="mb-3">
+                  <%= label_tag :theme, "Thème", class: "form-label" %>
+                  <%= select_tag :theme, options_for_select([["Système", "system"], ["Clair", "light"], ["Sombre", "dark"]]), class: "form-select", style: "background-color: #444; color: white; border: none;" %>
+                </div>
+
+                <div class="mb-3">
+                  <%= label_tag :language, "Langue", class: "form-label" %>
+                  <%= select_tag :language, options_for_select([["Français", "fr"], ["English", "en"]]), class: "form-select", style: "background-color: #444; color: white; border: none;" %>
+                </div>
+
+                <div class="mt-4">
+                  <%= button_tag "Supprimer tous les chats", type: "button", class: "btn btn-danger", id: "deleteAllChats" %>
+                </div>
+              </div>
+
+
+              <div class="tab-pane fade" id="customization-settings">
+                <h5>Personnalisation</h5>
+
+                <div class="mb-3">
+                  <%= label_tag :color_palette, "Palette de couleurs", class: "form-label" %>
+                  <%= select_tag :color_palette, options_for_select([
+                    ["Défaut", "default"],
+                    ["Daltonisme - Protanopie", "protanopia"],
+                    ["Daltonisme - Deutéranopie", "deuteranopia"],
+                    ["Daltonisme - Tritanopie", "tritanopia"],
+                    ["Contraste élevé", "high_contrast"]
+                  ]), class: "form-select", style: "background-color: #444; color: white; border: none;" %>
+                </div>
+
+                <div class="mb-3">
+                  <%= label_tag :text_size, "Taille du texte", class: "form-label" %>
+                  <%= range_field_tag :text_size, 16, min: 12, max: 24, step: 1, class: "form-range", id: "textSizeRange" %>
+                </div>
+
+                <div class="mb-3 p-3 border rounded" id="textSizePreview" style="background-color: #333; color: white; font-size: 16px;">
+                  Aperçu du texte (taille dynamique)
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer" style="border-top: 1px solid #555;">
+        <%= button_tag "Enregistrer", type: "button", class: "btn btn-success" %>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<div id="result"></div>
+
+<script type="module">
+  import "vendor/chart"
+  import "vendor/html2canvas"
+  import "vendor/jspdf"
+  import "vendor/select2"
+
+  import { initDataTable } from "lib/dataTables"
+
+  document.addEventListener("DOMContentLoaded", function() {
+    const textSizeRange = document.getElementById("textSizeRange");
+    const textSizePreview = document.getElementById("textSizePreview");
+
+    textSizeRange.addEventListener("input", function() {
+      textSizePreview.style.fontSize = `${this.value}px`;
+    });
+  });
+
+  document.getElementById('openSettingsModal').addEventListener('click', function() {
+    var myModal = new bootstrap.Modal(document.getElementById('settingsModal'));
+    myModal.show();
+  });
+
+  document.querySelectorAll("#sidebar .nav-link").forEach(link => {
+    link.addEventListener("click", function(event) {
+      event.stopPropagation();
+    });
+  });
+
+  document.getElementById("toggleSidebar").addEventListener("click", function(event) {
+    event.stopPropagation();
+    const sidebar = document.getElementById("sidebar");
+    const icon = document.getElementById("sidebarIcon");
+    const chatContainer = document.querySelector(".chat-container");
+    const page = document.getElementById("main");
+
+    if (sidebar.style.left === "0px") {
+      sidebar.style.left = "-250px";
+      icon.classList.remove("fa-xmark");
+      icon.classList.add("fa-bars");
+      chatContainer.classList.remove("open");
+    } else {
+      sidebar.style.left = "0";
+      icon.classList.remove("fa-bars");
+      icon.classList.add("fa-xmark");
+      chatContainer.classList.add("open");
+    }
+  });
+
+  function addMessageToChatBox(content, sender, isHtml = false) {
+    const chatBox = document.getElementById("chat-box");
+    const messageContainer = document.createElement("div");
+    messageContainer.style.display = "flex";
+    messageContainer.style.margin = "5px 0";
+    messageContainer.style.alignItems = "flex-end";
+    messageContainer.style.position = "relative";
+
+    const messageElement = document.createElement("div");
+    messageElement.classList.add("message");
+    messageElement.style.padding = "10px";
+    messageElement.style.borderRadius = "5px";
+    messageElement.style.maxWidth = "70%";
+    messageElement.style.position = "relative";
+
+    const botLogo = document.createElement("img");
+    botLogo.src = "logo_idyie.png";
+    botLogo.alt = "Bot Logo";
+    botLogo.style.width = "30px";
+    botLogo.style.height = "30px";
+    botLogo.style.borderRadius = "50%";
+    botLogo.style.margin = "0 10px";
+
+    if (sender === "bot") {
+        messageContainer.style.justifyContent = "flex-start";
+        messageElement.style.backgroundColor = "#e9ecef";
+        messageElement.style.color = "black";
+
+        messageContainer.appendChild(botLogo);
+        messageContainer.appendChild(messageElement);
+
+        const optionsButton = document.createElement("button");
+        optionsButton.innerHTML = `<i class="fas fa-ellipsis-v"></i>`;
+        optionsButton.style.position = "absolute";
+        optionsButton.style.top = "5px";
+        optionsButton.style.right = "5px";
+        optionsButton.style.border = "none";
+        optionsButton.style.background = "transparent";
+        optionsButton.style.cursor = "pointer";
+        optionsButton.style.color = "#555";
+
+        messageElement.appendChild(optionsButton);
+    } else {
+        messageContainer.style.justifyContent = "flex-end";
+        messageElement.style.backgroundColor = "grey";
+        messageElement.style.color = "white";
+
+        messageContainer.appendChild(messageElement);
+        messageContainer.appendChild(botLogo);
+    }
+
+    if (isHtml) {
+        messageElement.innerHTML += content;
+    } else {
+        messageElement.innerText = content;
+    }
+
+    chatBox.prepend(messageContainer);
+    return messageContainer;
+  }
+
+  function generateDownloadButton(messageContainer, chartId) {
+    const downloadBtn = document.createElement("button");
+    downloadBtn.classList.add("btn", "btn-dark", "mt-2");
+    downloadBtn.style.display = "block";
+    downloadBtn.innerHTML = "<i class='fa fa-file-pdf'></i> Télécharger";
+
+    messageContainer.appendChild(downloadBtn);
+
+    downloadBtn.addEventListener("click", function () {
+      const chartCanvas = document.getElementById(chartId);
+      html2canvas(chartCanvas, { scale: 2 }).then(canvas => {
+        const imgData = canvas.toDataURL("image/png");
+        const pdf = new jspdf.jsPDF("landscape");
+        pdf.addImage(imgData, "PNG", 10, 10, 280, 160);
+        pdf.save("download.pdf");
+      });
+    });
+  }
+
+  function generateBarChart(content) {
+    const chartId = "myChart-" + new Date().getTime();
+    const messageContainer = addMessageToChatBox(`<canvas id="${chartId}" width="400" height="200"></canvas>`, "bot", true);
+
+    const ctx = document.getElementById(chartId).getContext('2d');
+    new Chart(ctx, content);
+
+    generateDownloadButton(messageContainer, chartId);
+  }
+
+  function generateDataTable(content) {
+    const tableId = "myTable-" + new Date().getTime();
+    let table = `<table id="${tableId}" class="table table-bordered"><thead><tr>`;
+    content.columns.forEach(col => {
+      table += `<th>${col}</th>`;
+    });
+    table += "</tr></thead><tbody>";
+    content.rows.forEach(row => {
+      table += "<tr>" + row.map(cell => `<td>${cell}</td>`).join("") + "</tr>";
+    });
+    table += "</tbody></table>";
+
+    const messageContainer = addMessageToChatBox(table, "bot", true);
+    initDataTable(tableId);
+
+    generateDownloadButton(messageContainer, tableId);
+  }
+
+  function treatResponse(response = []) {
+    if (!response || !response.data) {
+      $("#result").html("<p>Aucun résultat</p>");
+      addMessageToChatBox("Aucun résultat", "bot");
+      return;
+    }
+
+    const data = JSON.parse(response.data);
+    if (!data || data.length === 0) {
+      $("#result").html("<p>Aucun résultat</p>");
+      addMessageToChatBox("Aucun résultat", "bot");
+      return;
+    }
+
+    const dataType = data.data_type;
+    if (dataType === "barChart") {
+      generateBarChart(data.content);
+    } else if (dataType === "table") {
+      generateDataTable(data.content);
+    } else {
+      $("#result").html("<p>Aucun résultat</p>");
+      addMessageToChatBox("Aucun résultat", "bot");
+    }
+  }
+
+  function callAjax(query = "") {
+    if (!query) {
+      $("#result").html("<p>Aucun résultat</p>");
+      addMessageToChatBox("Aucun résultat", "bot");
+      return;
+    }
+
+    addMessageToChatBox(query, "user");
+
+    $.ajax({
+      headers: {
+        "X-CSRF-Token": $('meta[name="csrf-token"]').attr('content')
+      },
+      url: "<%= url_for(controller: 'prompts', action: 'send_to_api') %>",
+      type: "POST",
+      data: { query: query },
+      success: function (response) {
+        $("input[name='search[query]']").val("");
+        treatResponse(response);
+      },
+      error: function (response) {
+        console.log("Error: ", response);
+        addMessageToChatBox("Une erreur est survenue", "bot");
+      }
+    });
+  }
+
+  $(document).ready(function() {
+    const $input = $("input[name='search[query]']");
+    const $button = $("#prompt");
+
+    function toggleButton() {
+      if ($input.val().trim() === "") {
+        $button.prop("disabled", true);
+      } else {
+        $button.prop("disabled", false);
+      }
+    }
+
+    $input.on("input", toggleButton);
+    toggleButton();
+
+    $button.click(function() {
+      const query = $input.val().trim();
+      if (query !== "") {
+        callAjax(query);
+      }
+    });
+  });
+
+
+  if ('webkitSpeechRecognition' in window) {
+    const recognition = new webkitSpeechRecognition();
+    recognition.continuous = false;
+    recognition.interimResults = false;
+    recognition.lang = 'fr-FR';
+
+    document.getElementById('microphone').style.color = "white";
+
+    recognition.onstart = function() {
+        console.log('Reconnaissance vocale démarrée');
+        document.getElementById('microphone').style.color = "#7FFFAB";
+    };
+
+    recognition.onresult = function(event) {
+        const transcript = event.results[0][0].transcript;
+        document.querySelector("input[name='search[query]']").value = transcript;
+        console.log('Transcription : ', transcript);
+    };
+
+    recognition.onerror = function(event) {
+        console.error('Erreur de reconnaissance vocale : ', event.error);
+        document.getElementById('microphone').style.color = "red";
+    };
+
+    recognition.onend = function() {
+        console.log('Reconnaissance vocale terminée');
+        document.getElementById('microphone').style.color = "white";+3.
+    };
+
+    document.getElementById('microphone').addEventListener('click', function() {
+        recognition.start();
+    });
+  } else {
+      console.error("L'API Web Speech n'est pas supportée par ce navigateur.");
+      alert("L'API Web Speech n'est pas supportée par ce navigateur.");
+  }
+</script>

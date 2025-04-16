@@ -6,9 +6,10 @@ Rails.application.routes.draw do
   get 'up' => 'rails/health#show', as: :rails_health_check
 
   # Defines the root path route ("/")
-  # root "posts#index"
+  root 'pages#login'
 
-  root 'home#index'
+  get 'login', to: 'pages#login'
+  get 'prompts', to: 'home#prompt'
 
   resources :prompts, only: %i[] do
     collection do
