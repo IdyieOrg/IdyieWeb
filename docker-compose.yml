@@ -4,15 +4,17 @@ services:
       context: .
       dockerfile: ./docker/Dockerfile
     container_name: idyie-web-application
+    depends_on:
+      - mariadb
     env_file: .env
     networks:
       - idyie-network
     ports:
       - "${PORT}:${PORT}"
+    stdin_open: true
+    tty: true
     volumes:
       - .:/app
-    depends_on:
-      - mariadb
 
   mariadb:
     image: mariadb:latest
