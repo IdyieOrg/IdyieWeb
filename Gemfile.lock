@@ -79,6 +79,7 @@ GEM
       public_suffix (>= 2.0.2, < 7.0)
     ast (2.4.2)
     base64 (0.2.0)
+    bcrypt (3.1.20)
     bigdecimal (3.1.8)
     bootsnap (1.18.3)
       msgpack (~> 1.2)
@@ -99,6 +100,12 @@ GEM
     crass (1.0.6)
     csv (3.3.0)
     date (3.3.4)
+    devise (4.9.4)
+      bcrypt (~> 3.0)
+      orm_adapter (~> 0.1)
+      railties (>= 4.1.0)
+      responders
+      warden (~> 1.2.3)
     diff-lcs (1.5.1)
     drb (2.2.1)
     erubi (1.13.0)
@@ -160,6 +167,7 @@ GEM
       racc (~> 1.4)
     nokogiri (1.16.6-aarch64-linux)
       racc (~> 1.4)
+    orm_adapter (0.5.0)
     overcommit (0.63.0)
       childprocess (>= 0.6.3, < 6)
       iniparse (~> 1.4)
@@ -222,6 +230,9 @@ GEM
     regexp_parser (2.9.2)
     reline (0.5.9)
       io-console (~> 0.5)
+    responders (3.1.1)
+      actionpack (>= 5.2)
+      railties (>= 5.2)
     rexml (3.3.1)
       strscan
     rspec-core (3.13.0)
@@ -298,6 +309,8 @@ GEM
     tzinfo (2.0.6)
       concurrent-ruby (~> 1.0)
     unicode-display_width (2.5.0)
+    warden (1.2.9)
+      rack (>= 2.0.9)
     webrick (1.8.1)
     websocket (1.2.10)
     websocket-driver (0.7.6)
@@ -315,6 +328,7 @@ DEPENDENCIES
   bootsnap
   byebug
   capybara
+  devise
   httparty
   importmap-rails
   jbuilder

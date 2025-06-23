@@ -69,6 +69,8 @@ group :test do
   gem 'selenium-webdriver'
 end
 
+gem 'devise'
+
 gem 'httparty'
 
 gem 'overcommit', require: false
