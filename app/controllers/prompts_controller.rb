@@ -1,9 +1,11 @@
 class PromptsController < ApplicationController
   def send_to_api
-    @prompts = IdyieApiService.get('/prompts', body: { prompt: params[:query] })
+    jwt = session[:jwt_token]
+    service = IdyieApiService.new(jwt)
+    response = service.get('/prompts', body: { prompt: params[:query] })
 
-    if @prompts
-      render json: @prompts, status: :ok
+    if response.success?
+      render json: JSON.parse(response.body), status: :ok
     else
       render json: { error: 'Unable to fetch prompts' }, status: :bad_request
     end
