@@ -1,25 +1,27 @@
 .login-page {
-  background-color: #000; 
+  background-color: var(--bg-primary);
+  min-height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100%;
-  width: 100%;
+  width: 100vw;
+  height: auto;
+  position: relative;
 }
 
 .login-container {
   width: 100%;
   max-width: 450px;
   text-align: center;
-  background-color: #111;
+  background-color: var(--bg-secondary);
   border-radius: 10px;
-  box-shadow: 0px 0px 15px #7FFFAB;
+  box-shadow: 0px 0px 15px var(--accent-color);
   padding: 30px;
 }
 
 .title {
   font-size:200%;
-  color: #7FFFAB;
+  color: var(--accent-color);
   margin-bottom: 40px;
 }
 
@@ -38,32 +40,31 @@
 }
 
 .form-group:focus-within label {
-  color: #7FFFAB;
+  color: var(--accent-color);
 }
 
 label {
   margin-bottom: 5px;
   font-size: 13px;
-  color: #7D7D7D;
+  color: var(--text-secondary);
 }
 
 .input {
   width: 100%;
   padding: 15px;
-  border: 2px solid #7D7D7D;
+  border: 2px solid var(--input-border);
   border-radius: 5px;
-  background: #2c2c2c;
+  background: var(--bg-secondary);
   font-size: 14px;
   outline: none;
-  color: white;
-  
+  color: var(--text-primary);
   &::placeholder {
-    color: white;
+    color: var(--text-secondary);
     opacity: 0.8;
   }
 
   &:focus {
-    border-color: #7FFFAB;
+    border-color: var(--accent-color);
   }
 }
 
@@ -74,17 +75,20 @@ label {
 
 .eye-icon {
   position: absolute;
-  top: 25%;
-  right: 15px;
-  font-size: 18px;
-  color: #7D7D7D;
-  transition: color 0.3s ease;
+  right: 5%;
+  color: var(--text-secondary);
+  top: 35%;
+  background: transparent;
+}
+
+.eye-icon:hover {
+  color: var(--accent-color);
 }
 
 .divider {
   margin: 20px 0;
   text-align: center;
-  color: #7D7D7D;
+  color: var(--text-secondary);
   font-size: 12px;
   position: relative;
 }
@@ -96,7 +100,7 @@ label {
   top: 50%;
   width: 40%;
   height: 1px;
-  background-color: #7D7D7D;
+  background-color: var(--text-secondary);
 }
 
 .divider:before {
@@ -111,10 +115,10 @@ label {
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #1d1d1d;
-  border: 1px solid #7FFFAB;
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--accent-color);
   border-radius: 5px;
-  color: #7FFFAB;
+  color: var(--accent-color);
   padding: 10px;
   text-decoration: none;
   width: 10%;
@@ -122,9 +126,9 @@ label {
 }
 
 .custom-btn:hover {
-  background-color: #146c43;
+  background-color: var(--send-btn-hover);
   color: white;
-  border: 1px solid #198754;
+  border: 1px solid #00000050;
   transform: scale(1.02);
   box-shadow: 0px 6px 10px rgba(0, 0, 0, 0.2);
 }
@@ -138,4 +142,53 @@ label {
   width: 100%;
   padding: 15px;
   font-size: 16px;
+}
+
+.theme-selector {
+  position: absolute;
+  top: 24px;
+  right: 32px;
+  display: flex;
+  gap: 12px;
+  z-index: 2;
+}
+
+.theme-btn {
+  background: var(--input-bg);
+  border: 2px solid var(--text-secondary);
+  color: var(--text-secondary);
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s, border 0.2s, box-shadow 0.2s;
+  outline: none;
+}
+
+.theme-btn.active {
+  color: var(--accent-color);
+  box-shadow: 0px 0px 10px var(--accent-color);
+}
+
+.theme-btn.active i {
+  color: rgb(250, 28, 7);
+}
+
+:root[data-theme="light"] .theme-btn.active i {
+  color: brown;
+}
+
+.theme-btn:focus,
+.theme-btn:hover {
+  box-shadow: 0px 0px 10px var(--accent-color);
+
+}
+
+.theme-btn:focus i,
+.theme-btn:hover i {
+  color: orange;
 }

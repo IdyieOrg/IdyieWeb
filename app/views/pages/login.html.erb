@@ -1,5 +1,13 @@
 <div class="login-page">
   <div class="login-container">
+    <div class="theme-selector">
+      <button type="button" class="theme-btn" id="dark-theme" title="Mode sombre">
+        <i class="fas fa-moon"></i>
+      </button>
+      <button type="button" class="theme-btn" id="light-theme" title="Mode clair">
+        <i class="fas fa-sun"></i>
+      </button>
+    </div>
 
     <div class="title">
       <h1 style="font-size:175%;">Welcome to</h1>
@@ -15,8 +23,8 @@
       <div class="form-group">
         <%= label_tag :password, "Password" %>
         <div class="password-container">
-          <%= password_field_tag :password, nil, class: "input", placeholder: "password", id: "password", required: true %>
-          <i class="eye-icon" id="togglePassword">&#128065;</i>
+          <%= password_field_tag :password, nil, class: "input", style: "padding-right: 40px;", placeholder: "password", id: "password", required: true %>
+          <i class="fas fa-eye-slash eye-icon" id="togglePassword"></i>
         </div>
       </div>
 
@@ -38,16 +46,22 @@
 </div>
 
 <script>
-  document.getElementById('togglePassword').addEventListener('click', function() {
-    var passwordField = document.getElementById('password');
-    var eyeIcon = document.getElementById('togglePassword');
+  document.addEventListener('DOMContentLoaded', function() {
+    const container = document.querySelector('.password-container');
+    const passwordField = document.getElementById('password');
 
-    if (passwordField.type === "password") {
-      passwordField.type = "text";
-      eyeIcon.style.color = "#7FFFAB";
-    } else {
-      passwordField.type = "password";
-      eyeIcon.style.color = "#7D7D7D";
-    }
+    container.addEventListener('click', function(e) {
+      const eyeIcon = e.target.closest('#togglePassword');
+      if (!eyeIcon) return;
+
+      e.preventDefault();
+
+      const isPassword = passwordField.type === 'password';
+      passwordField.type = isPassword ? 'text' : 'password';
+
+      eyeIcon.classList.toggle('fa-eye-slash', !isPassword);
+      eyeIcon.classList.toggle('fa-eye', isPassword);
+    });
   });
 </script>
+
