@@ -38,3 +38,4 @@
 # Development garbage.
 .byebug_history
 .rspec
+Gemfile.lock
