@@ -34,8 +34,10 @@ jobs:
           echo "------ Entering IdyieWeb directory ------"
           cd /root/IdyieOrg/IdyieWeb
 
-          echo "------ Pulling latest code ------"
-          git pull origin prod
+          echo "------ Resetting local changes and cleaning untracked files ------"
+          git fetch origin prod
+          git reset --hard origin/prod
+          git clean -fd
 
           echo "------ Displaying Docker logs before update ------"
           docker compose logs --tail 50 || true
