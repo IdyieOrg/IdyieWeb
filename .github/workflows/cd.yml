@@ -13,16 +13,41 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Set up SSH
-        uses: webfactory/ssh-agent@v0.5.3
-        with:
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+      - name: Create SSH key file
+        run: |
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > private_key
+          chmod 600 private_key
+
+      - name: Create known_hosts file
+        run: |
+          ssh-keyscan -p 22 ${{ secrets.DEPLOY_HOST }} > known_hosts
 
       - name: Deploy via SSH
         run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} << 'EOF'
+          set -e
+          ssh -i private_key \
+              -o UserKnownHostsFile=known_hosts \
+              -o IdentitiesOnly=yes \
+              ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} << 'EOF'
+
+          set -e
+          echo "------ Entering IdyieWeb directory ------"
           cd /root/IdyieOrg/IdyieWeb
-          git pull origin prod
+
+          echo "------ Resetting local changes and cleaning untracked files ------"
+          git fetch origin prod
+          git reset --hard origin/prod
+          git clean -fd
+
+          echo "------ Displaying Docker logs before update ------"
+          docker compose logs --tail 50 || true
+
+          echo "------ Restarting Docker containers ------"
           docker compose down
           docker compose up -d
+
+          echo "------ Deployment complete ------"
           EOF
+
+      - name: Cleanup SSH files
+        run: rm -f private_key known_hosts

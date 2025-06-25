@@ -1,5 +1,5 @@
 # Base image
-FROM ruby:3.2.2
+FROM ruby:3.4.4-slim
 
 # Install dependencies
 RUN apt-get update -qq && apt-get install -y \
@@ -9,6 +9,8 @@ RUN apt-get update -qq && apt-get install -y \
     mariadb-client \
     nano \
     git \
+    libyaml-dev \
+    libmariadb-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Set working directory
