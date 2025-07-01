@@ -14,20 +14,82 @@
  *= require_self
  */
 
-$primary-dark-color: #00bf63;
-$secondary-dark-color: #212121;
+[data-theme="dark"] #dark-theme {
+  box-shadow: 0 0 10px 2px #7FFFAB;
+}
 
-$primary-light-color: #00bf63;
-$secondary-light-color: #f5f5f5;
+[data-theme="light"] #light-theme {
+  box-shadow: 0 0 10px 2px #3C3C3C;
+}
 
-body {
-  &.light {
-    background-color: $secondary-light-color;
-    color: $primary-light-color;
-  }
+[data-theme="dark"] .theme-btn i {
+  color: #7FFFAB; // ta couleur pour les icônes sur fond sombre
+}
 
-  &.dark {
-    background-color: $secondary-dark-color;
-    color: $primary-dark-color;
-  }
+[data-theme="light"] .theme-btn i {
+  color: #3C3C3C; // ta couleur pour les icônes sur fond clair
+}
+
+:root {
+  --bg-primary: #111;
+  --bg-secondary: #222;
+  --text-primary: #ffffff;
+  --text-secondary: #7D7D7D;
+  --border-color: #7D7D7D;
+  --input-bg: #3C3C3C;
+  --input-border: #7D7D7D;
+  --accent-color: #7FFFAB;
+  --menu-btn-bg: #222;
+  --menu-btn-color: #fff;
+  --menu-btn-hover: #333;
+  --sidebar-bg: #181818;
+  --sidebar-color: #fff;
+  --sidebar-title-color: #7FFFAB;
+  --sidebar-menu-hover: #232323;
+  --sidebar-menu-active: #7FFFAB;
+  --sidebar-logout-color: #FF5656;
+  --prompt-input-bar-bg: #282828;
+  --mic-btn-color: #fff;
+  --mic-btn-hover: #7FFFAB;
+  --prompt-input-bg: #3C3C3C;
+  --send-btn-hover: #146c43;
+  --modal-bg: #282828;
+  --modal-color: #fff;
+  --modal-border: #444;
+  --modal-menu-hover: #3a3a3a;
+  --modal-menu-font-color: #ffffff;
+  --input-color: #ffffff;
+  --modal-close-color: #ffffff;
+}
+
+:root[data-theme="light"] {
+  --bg-primary: #FFFFFF;
+  --bg-secondary: #F7F7F8;
+  --text-primary: #000000;
+  --text-secondary: #7D7D7D;
+  --border-color: #E4E4E4;
+  --input-bg: #FFFFFF;
+  --input-border: #00000025;
+  --accent-color: #3C3C3C;
+  --menu-btn-bg: #fff;
+  --menu-btn-color: #000000;
+  --menu-btn-hover: #E4E4E4;
+  --sidebar-bg: #F8FAF7;
+  --sidebar-color: #000000;
+  --sidebar-title-color: #000000;
+  --sidebar-menu-hover: #E4E4E4;
+  --sidebar-menu-active: #3C3C3C;
+  --sidebar-logout-color: #FF5656;
+  --prompt-input-bar-bg: #FFFFFF;
+  --mic-btn-color: #000000;
+  --mic-btn-hover: #3C3C3C;
+  --prompt-input-bg: #FFFFFF;
+  --send-btn-hover: #3C3C3C;
+  --modal-bg: #fff;
+  --modal-color: #000000;
+  --modal-border: #444;
+  --modal-menu-hover: #E4E4E4;
+  --modal-menu-font-color: #000000;
+  --input-color: #000000;
+  --modal-close-color: #000000;
 }
