@@ -28,22 +28,31 @@
         <%= f.password_field :password, class: "input", style: "padding-right: 40px;", placeholder: "password", id: "password", required: true %>
         <i class="fas fa-eye-slash eye-icon" id="togglePassword"></i>
       </div>
+      <% if devise_mapping.recoverable? %>
+        <div class="form-group" style="text-align: right; margin-top: -10px;">
+          <%= link_to "Forgot your password?", new_password_path(resource_name), class: "forgot-password" %>
+        </div>
+      <% end %>
     </div>
-
-    <% if devise_mapping.rememberable? %>
-      <div class="field">
-        <%= f.check_box :remember_me %>
-        <%= f.label :remember_me %>
-      </div>
-    <% end %>
 
     <div class="form-group">
       <%= f.submit "Log in", class: "custom-btn login-btn" %>
+      <% if devise_mapping.rememberable? %>
+        <div class="remember">
+          <%= f.check_box :remember_me%>
+          <%= f.label :remember_me, style: "margin-top: 6px;" %>
+        </div>
+      <% end %>
     </div>
 
-    <div class="form-group">
-      <%= render "devise/shared/links" %>
-    </div>
+    <div class="divider">OR</div>
+
+    <% if devise_mapping.registerable? %>
+      <div class="form-group" style="text-align: center; margin-top: 10px;">
+        <%= link_to "Sign up", new_registration_path(resource_name), class: "custom-btn login-btn" %>
+      </div>
+    <% end %>
+
   </div>
 </div>
 <% end %>

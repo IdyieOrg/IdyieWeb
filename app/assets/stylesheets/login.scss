@@ -192,3 +192,50 @@ label {
 .theme-btn:hover i {
   color: orange;
 }
+
+.forgot-password {
+  display: flex;
+  justify-content: flex-start;
+  text-align: left;
+  color: var(--text-secondary);
+  font-size: 12px;
+  margin-top: 15px;
+  margin-left: -15px;
+  padding-bottom: 10px;
+  &:hover {
+    color: var(--accent-color);
+  }
+}
+
+.remember {
+  display: flex;
+  align-items: right;
+  gap: 5px;
+  padding-left: 2px;
+}
+
+.remember label {
+  color: var(--text-secondary) !important;
+}
+
+.back-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 20px;
+  width: 100%;
+}
+
+.back-link {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+  text-decoration: none;
+  color: var(--text-secondary);
+  font-weight: bold;
+}
+
+.back-link:hover{
+  color: var(--accent-color);
+}
