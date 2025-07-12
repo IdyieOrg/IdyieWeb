@@ -21,4 +21,11 @@ Rails.application.routes.draw do
       post 'send_to_api'
     end
   end
+
+  resources :chats, only: [:index, :show, :create, :destroy, :update] do
+    collection do
+      post 'create_empty'
+    end
+    resources :messages, only: [:create]
+  end
 end

@@ -14,12 +14,22 @@
     <h2 class="sidebar-title fondamento-regular">Idyie</h2>
     <hr>
     <ul class="sidebar-menu">
-      <li><%= link_to raw('<i class="fas fa-plus"></i> Nouvelle Requête'), '#', class: '' %></li>
-      <li><%= link_to raw('<i class="fas fa-history"></i> Historique'), '#', class: '' %></li>
-      <li><%= link_to raw('<i class="fas fa-cog"></i> Paramètres'), '#', id: 'openSettingsModal' %></li>
+      <li><%= link_to raw('<i class="fas fa-cog"></i> Paramètres'), '#', id: 'openSettingsModal', class: 'sidebar-menu-link', data: { turbo: false } %></li>
+      <li>
+        <a href="#" id="new-chat-btn" class="sidebar-menu-link">
+          <i class="fas fa-plus"></i> Nouvelle requête
+        </a>
+      </li>
+      <li>
+        <button id="toggle-history-btn" class="sidebar-history-toggle">
+          <span><i class="fas fa-history"></i> Historique</span>
+          <span id="history-arrow" class="sidebar-history-arrow">&#9660;</span>
+        </button>
+      </li>
     </ul>
+    <ul id="sidebar-chat-history" class="sidebar-chat-history"></ul>
     <hr class="sidebar-bottom-hr">
-    <%= button_to 'Logout', destroy_user_session_path, method: :delete, class: 'btn btn-danger w-100' %>
+    <%= button_to raw('<i class="fas fa-sign-out-alt"></i> Déconnexion'), destroy_user_session_path, method: :delete, class: 'sidebar-logout' %>
   </div>
 
   <button id="toggleSidebar" class="menu-btn">
@@ -31,7 +41,7 @@
       <div id="chat-box" class="chat-box"></div>
     </div>
 
-    <form class="prompt-input-bar" autocomplete="off" onsubmit="return false;">
+    <form class="prompt-input-bar" autocomplete="off">
       <button type="button" class="mic-btn" tabindex="-1">
         <i class="fas fa-microphone" id="microphone"></i>
       </button>
@@ -148,6 +158,12 @@
 <div id="result"></div>
 
 <script>
+  // Variables globales
+  if (typeof window.currentChatId === 'undefined') {
+    window.currentChatId = null;
+  }
+  // const currentChatId = window.currentChatId; // SUPPRIMÉ pour éviter l'erreur Turbo
+  
   console.log('Prompt: Script loaded');
 
   // Check if DOM is already loaded
@@ -192,19 +208,23 @@
       console.log('Prompt: Saved sidebar state:', savedSidebarState, 'Should open:', shouldOpenSidebar);
 
       if (shouldOpenSidebar) {
-        sidebar.classList.add('open');
-        promptPage.classList.add('sidebar-open');
-        icon.classList.remove('fa-bars');
-        icon.classList.add('fa-xmark');
-        console.log('Prompt: Sidebar opened by default or saved state');
-        console.log('Prompt: Icon should be X, current classes:', icon.className);
+        if (sidebar) sidebar.classList.add('open');
+        if (promptPage) promptPage.classList.add('sidebar-open');
+        if (icon) {
+          icon.classList.remove('fa-bars');
+          icon.classList.add('fa-xmark');
+          console.log('Prompt: Sidebar opened by default or saved state');
+          console.log('Prompt: Icon should be X, current classes:', icon.className);
+        }
       } else {
-        sidebar.classList.remove('open');
-        promptPage.classList.remove('sidebar-open');
-        icon.classList.remove('fa-xmark');
-        icon.classList.add('fa-bars');
-        console.log('Prompt: Sidebar closed by saved state');
-        console.log('Prompt: Icon should be burger, current classes:', icon.className);
+        if (sidebar) sidebar.classList.remove('open');
+        if (promptPage) promptPage.classList.remove('sidebar-open');
+        if (icon) {
+          icon.classList.remove('fa-xmark');
+          icon.classList.add('fa-bars');
+          console.log('Prompt: Sidebar closed by saved state');
+          console.log('Prompt: Icon should be burger, current classes:', icon.className);
+        }
       }
 
       // Remove any existing listeners to avoid duplicates
@@ -214,22 +234,24 @@
       function toggleSidebarHandler(e) {
         e.stopPropagation();
         console.log('Prompt: Toggle sidebar clicked');
-        const isOpen = sidebar.classList.toggle('open');
-        promptPage.classList.toggle('sidebar-open', isOpen);
+        const isOpen = sidebar ? sidebar.classList.toggle('open') : false;
+        if (promptPage) promptPage.classList.toggle('sidebar-open', isOpen);
         console.log('Prompt: Sidebar is now:', isOpen ? 'open' : 'closed');
 
         // Sauvegarder l'état de la sidebar
         localStorage.setItem('sidebar_open', isOpen.toString());
         console.log('Prompt: Sidebar state saved:', isOpen);
 
-        if (isOpen) {
-          icon.classList.remove('fa-bars');
-          icon.classList.add('fa-xmark');
-          console.log('Prompt: Icon changed to X');
-        } else {
-          icon.classList.remove('fa-xmark');
-          icon.classList.add('fa-bars');
-          console.log('Prompt: Icon changed to burger');
+        if (icon) {
+          if (isOpen) {
+            icon.classList.remove('fa-bars');
+            icon.classList.add('fa-xmark');
+            console.log('Prompt: Icon changed to X');
+          } else {
+            icon.classList.remove('fa-xmark');
+            icon.classList.add('fa-bars');
+            console.log('Prompt: Icon changed to burger');
+          }
         }
       }
 
@@ -265,21 +287,33 @@
       console.log('Prompt: Close sidebar handler attached');
     }
 
-    // Gestion du bouton d'ouverture de la modal
-    var openSettingsBtn = document.getElementById('openSettingsModal');
-    if (openSettingsBtn) {
-      openSettingsBtn.addEventListener('click', function() {
-        var myModalEl = document.getElementById('settingsModal');
-        var myModal = new bootstrap.Modal(myModalEl);
-        myModal.show();
+    // Handler unique pour l'ouverture du modal des paramètres
+    function openSettingsHandler(e) {
+      console.log('openSettingsHandler called');
+      const modalEl = document.getElementById('settingsModal');
+      const promptPage = document.querySelector('.prompt-page');
+      if (modalEl) {
+        console.log('Modal element found, opening modal');
+        const modal = new bootstrap.Modal(modalEl);
+        modal.show();
         localStorage.setItem('settings_modal_open', 'true');
-        var promptPage = document.querySelector('.prompt-page');
         if (promptPage) promptPage.classList.add('modal-opened');
-        myModalEl.addEventListener('hidden.bs.modal', function() {
+        modalEl.addEventListener('hidden.bs.modal', function () {
+          console.log('Modal hidden event');
           if (promptPage) promptPage.classList.remove('modal-opened');
           localStorage.setItem('settings_modal_open', 'false');
         }, { once: true });
-      });
+      } else {
+        console.log('Modal element NOT found');
+      }
+    }
+    const openSettingsBtn = document.getElementById('openSettingsModal');
+    if (openSettingsBtn) {
+      console.log('Attaching openSettingsHandler to openSettingsBtn');
+      openSettingsBtn.removeEventListener('click', openSettingsHandler);
+      openSettingsBtn.addEventListener('click', openSettingsHandler);
+    } else {
+      console.log('openSettingsBtn NOT found');
     }
 
     // Persistance de l'onglet actif du modal
@@ -360,8 +394,42 @@
         e.preventDefault();
         const input = promptForm.querySelector('.prompt-input');
         const value = input.value.trim();
-        if (value) {
-          addMessageToChatBox(value, 'user');
+        console.log('SUBMIT TRIGGERED');
+        console.log('currentChatId:', window.currentChatId);
+        console.log('input value:', value);
+        
+        // Fonction pour envoyer le message une fois qu'un chat est disponible
+        function sendMessage() {
+          if (value && window.currentChatId) {
+            console.log('Envoi du message à', `/chats/${window.currentChatId}/messages`);
+            fetch(`/chats/${window.currentChatId}/messages`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+              },
+              body: JSON.stringify({ message: { role: 'user', content: value } })
+            })
+            .then(resp => {
+              console.log('Réponse du serveur:', resp);
+              return resp.json();
+            })
+            .then(data => {
+              console.log('Données reçues:', data);
+              // Sauvegarder l'ID du chat dans localStorage après le premier message !
+              if (!localStorage.getItem('current_chat_id')) {
+                localStorage.setItem('current_chat_id', window.currentChatId);
+              }
+              selectChat(window.currentChatId);
+              // Recharger l'historique des chats car le chat a maintenant des messages
+              const chatList = document.getElementById('sidebar-chat-history');
+              if (chatList) {
+                loadChats();
+              }
+            })
+            .catch(err => {
+              console.error('Erreur lors du fetch:', err);
+            });
           input.value = '';
           // Appel AJAX pour la réponse bot
           fetch('<%= url_for(controller: 'prompts', action: 'send_to_api') %>', {
@@ -375,21 +443,19 @@
           .then(response => response.json())
           .then(response => {
             // Traitement de la réponse
+              let botContent = null;
             try {
               const data = JSON.parse(response.data);
               if (Array.isArray(data)) {
-                addMessageToChatBox("Aucun résultat", "bot");
+                  botContent = "Aucun résultat";
               } else if (data.data_type === "barChart") {
-                // Créer un canvas pour le graphique
                 const canvasId = 'chart-' + Date.now();
-                const canvasHtml = `<canvas id="${canvasId}" width="400" height="200"></canvas>`;
-                addMessageToChatBox(canvasHtml, "bot", true);
-                setTimeout(() => {
-                  const ctx = document.getElementById(canvasId).getContext('2d');
-                  new Chart(ctx, data.content);
-                }, 100);
+                const chartConfig = JSON.stringify(data.content);
+                console.log('Chart data reçu avant affichage:', data.content); // Ajout du log ici
+                botContent = `<canvas id="${canvasId}" width="400" height="200" data-chart='${chartConfig.replace(/'/g, "&apos;")}'></canvas>`;
               } else if (data.data_type === "table") {
-                let tableHtml = '<table class="table table-striped">';
+                let tableId = 'table-' + Date.now();
+                let tableHtml = `<table id="${tableId}" class="table table-striped">`;
                 tableHtml += '<thead><tr>';
                 data.content.columns.forEach(column => {
                   tableHtml += `<th>${column}</th>`;
@@ -403,18 +469,60 @@
                   tableHtml += '</tr>';
                 });
                 tableHtml += '</tbody></table>';
-                addMessageToChatBox(tableHtml, "bot", true);
+                  botContent = tableHtml;
               } else {
-                addMessageToChatBox("Réponse inconnue", "bot");
+                  botContent = "Réponse inconnue";
               }
             } catch (e) {
-              addMessageToChatBox("Erreur de traitement de la réponse", "bot");
-            }
+                botContent = "Erreur de traitement de la réponse";
+              }
+              // Affichage live immédiat (avant sauvegarde)
+              const isHtml = typeof botContent === 'string' && (
+                botContent.trim().startsWith('<canvas') ||
+                botContent.trim().startsWith('<table')
+              );
+              addMessageToChatBox(botContent, 'bot', isHtml);
+              // 2. Sauvegarde la réponse bot côté serveur
+              fetch(`/chats/${window.currentChatId}/messages`, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: JSON.stringify({ message: { role: 'assistant', content: botContent } })
+              })
+              .then(resp => resp.json())
+              .then(() => {
+                selectChat(window.currentChatId);
+              });
           })
           .catch(() => {
-            addMessageToChatBox("Une erreur est survenue", "bot");
+              fetch(`/chats/${window.currentChatId}/messages`, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: JSON.stringify({ message: { role: 'assistant', content: "Une erreur est survenue" } })
+              })
+              .then(resp => resp.json())
+              .then(() => {
+                selectChat(window.currentChatId);
+              });
+            });
+          } else if (value && !window.currentChatId) {
+            console.log('Aucun chat disponible, création d\'un nouveau chat...');
+            // Créer un nouveau chat et envoyer le message
+            createNewEmptyChat().then((chat) => {
+              window.currentChatId = chat.id; // MAJ ici
+              console.log('Chat créé, envoi du message...');
+              sendMessage(); // Rappel récursif, mais currentChatId est bien défini
           });
         }
+        }
+        
+        // Appeler la fonction d'envoi
+        sendMessage();
       });
     }
 
@@ -428,53 +536,168 @@
       observer.observe(sidebar, { attributes: true, attributeFilter: ['class'] });
     }
 
+    // Initialisation du système de chat
+    initChatSystem();
+
+    // Charger le chat sauvegardé ou créer un nouveau chat
+    const savedChatId = localStorage.getItem('current_chat_id');
+    if (savedChatId) {
+      selectChat(savedChatId);
+    } else {
+      createNewEmptyChat();
+    }
+
+    // Toggle historique
+    const toggleHistoryBtn = document.getElementById('toggle-history-btn');
+    const chatHistory = document.getElementById('sidebar-chat-history');
+    const historyArrow = document.getElementById('history-arrow');
+    let historyCollapsed = false;
+    if (toggleHistoryBtn && chatHistory && historyArrow) {
+      toggleHistoryBtn.addEventListener('click', function() {
+        historyCollapsed = !historyCollapsed;
+        chatHistory.classList.toggle('collapsed', historyCollapsed);
+        historyArrow.classList.toggle('collapsed', historyCollapsed);
+      });
+    }
+
     console.log('Prompt: Prompt page initialization complete');
   }
 
+  // Fonction pour créer un nouveau chat vide
+  function createNewEmptyChat() {
+    return fetch('/chats/create_empty', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-Token': document.querySelector('meta[name=\'csrf-token\']').content
+      }
+    })
+    .then(resp => {
+      if (!resp.ok) {
+        throw new Error(`HTTP ${resp.status}: ${resp.statusText}`);
+      }
+      return resp.json();
+    })
+    .then(chat => {
+      console.log('Nouveau chat vide créé automatiquement:', chat);
+      if (chat.error) {
+        throw new Error(chat.error);
+      }
+      // NE PAS mettre window.currentChatId ici !
+      window.currentChatId = chat.id;
+      localStorage.setItem('current_chat_id', chat.id);
+      const chatBox = document.getElementById('chat-box');
+      if (chatBox) {
+        chatBox.innerHTML = '<div class="chat-empty">Nouveau chat - Tapez votre message pour commencer</div>';
+      }
+      return chat; // Retourner le chat pour la Promise
+    })
+    .catch(error => {
+      console.error('Erreur lors de la création automatique du chat vide:', error);
+      throw error; // Propager l'erreur
+    });
+  }
+
+  // Fonction utilitaire pour créer un message DOM avec la classe d'origine
+  function createMessageElement(content, sender, isHtml = false) {
+    const msgDiv = document.createElement('div');
+    msgDiv.className = 'message ' + (sender === 'user' ? 'user' : 'bot');
+
+    // Avatar pour le bot
+    let avatar = null;
+    if (sender === 'bot') {
+      avatar = document.createElement('img');
+      avatar.className = 'avatar';
+      avatar.src = 'logo_idyie.png';
+      avatar.alt = 'Bot';
+    }
+
+    // Bulle
+    const bubble = document.createElement('div');
+    bubble.className = 'bubble';
+    if (isHtml) {
+      bubble.innerHTML = content;
+    } else {
+      bubble.textContent = content;
+    }
+
+    if (sender === 'bot') {
+      msgDiv.appendChild(avatar);
+      msgDiv.appendChild(bubble);
+    } else {
+      msgDiv.appendChild(bubble);
+    }
+
+    return msgDiv;
+  }
+
+  // Affichage immédiat d'un message (user ou bot)
   function addMessageToChatBox(content, sender, isHtml = false) {
     const chatBox = document.getElementById("chat-box");
-    const messageContainer = document.createElement("div");
-    messageContainer.style.display = "flex";
-    messageContainer.style.margin = "10px 0";
-    messageContainer.style.alignItems = "flex-end";
-    messageContainer.style.position = "relative";
-
-    const messageElement = document.createElement("div");
-    messageElement.classList.add("message");
-    messageElement.style.padding = "10px";
-    messageElement.style.borderRadius = "5px";
-    messageElement.style.maxWidth = "70%";
-    messageElement.style.position = "relative";
-
-    if (sender === "bot") {
-      messageContainer.style.justifyContent = "flex-start";
-      messageElement.style.backgroundColor = "#e9ecef";
-      messageElement.style.color = "black";
-
-      const botLogo = document.createElement("img");
-      botLogo.src = "logo_idyie.png";
-      botLogo.alt = "Bot Logo";
-      botLogo.style.width = "30px";
-      botLogo.style.height = "30px";
-      botLogo.style.borderRadius = "50%";
-      botLogo.style.margin = "0 10px";
-      messageContainer.appendChild(botLogo);
-      messageContainer.appendChild(messageElement);
-    } else {
-      messageContainer.style.justifyContent = "flex-end";
-      messageElement.style.backgroundColor = "#7FFFAB";
-      messageElement.style.color = "#111";
-      messageContainer.appendChild(messageElement);
-    }
-
-    if (isHtml) {
-      messageElement.innerHTML = content;
-    } else {
-      messageElement.textContent = content;
-    }
-
-    chatBox.appendChild(messageContainer);
+    const msgDiv = createMessageElement(content, sender, isHtml);
+    chatBox.appendChild(msgDiv);
     chatBox.scrollTop = chatBox.scrollHeight;
+  }
+
+  // Affichage de l'historique
+  function renderMessages(messages) {
+    const chatBox = document.getElementById('chat-box');
+    if (!chatBox) return;
+    chatBox.innerHTML = '';
+    if (!messages || messages.length === 0) {
+      chatBox.innerHTML = '<div class="chat-empty">Aucun message dans ce chat</div>';
+      return;
+    }
+    messages.forEach(msg => {
+      const isHtml = typeof msg.content === 'string' && (
+        msg.content.trim().startsWith('<canvas') ||
+        msg.content.trim().startsWith('<table')
+      );
+      const msgDiv = createMessageElement(msg.content, msg.role, isHtml);
+      chatBox.appendChild(msgDiv);
+
+      // Ajout du menu d'export pour les charts
+      if (isHtml && msg.content.trim().startsWith('<canvas')) {
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = msg.content;
+        const canvas = tempDiv.querySelector('canvas[data-chart]');
+        if (canvas) {
+          addExportMenu(msgDiv, "chart", canvas.id);
+        }
+      }
+      // Ajout du menu d'export pour les tables
+      if (isHtml && msg.content.trim().startsWith('<table')) {
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = msg.content;
+        const table = tempDiv.querySelector('table');
+        if (table) {
+          addExportMenu(msgDiv, "table", table.id);
+        }
+      }
+    });
+    // Initialiser les charts APRÈS le rendu DOM
+    chatBox.querySelectorAll('canvas[data-chart]').forEach(canvas => {
+      if (canvas && typeof canvas.getContext === 'function') {
+        try {
+          const chartData = JSON.parse(canvas.getAttribute('data-chart'));
+          console.log('Initialisation Chart.js sur', canvas, 'avec data:', chartData);
+          new Chart(canvas.getContext('2d'), chartData);
+          // addExportMenu(msgDiv, "chart", canvas.id); // Ajout du menu d'export - Déjà fait dans renderMessages
+        } catch (e) {
+          console.error('Erreur lors de l\'initialisation du chart:', {
+            canvas,
+            dataChart: canvas.getAttribute('data-chart'),
+            error: e
+          });
+        }
+      } else {
+        console.warn('Canvas non valide ou getContext non disponible:', canvas);
+      }
+    });
+    // Scroll en bas
+    requestAnimationFrame(() => {
+      chatBox.scrollTop = chatBox.scrollHeight;
+    });
   }
 
   function treatResponse(response) {
@@ -485,17 +708,14 @@
       } else if (data.data_type === "barChart") {
         // Créer un canvas pour le graphique
         const canvasId = 'chart-' + Date.now();
-        const canvasHtml = `<canvas id="${canvasId}" width="400" height="200"></canvas>`;
+        const canvasHtml = `<canvas id="${canvasId}" width="400" height="200" data-chart='${JSON.stringify(data.content)}'></canvas>`;
         addMessageToChatBox(canvasHtml, "bot", true);
-
-        // Initialiser le graphique après un court délai
-        setTimeout(() => {
-          const ctx = document.getElementById(canvasId).getContext('2d');
-          new Chart(ctx, data.content);
-        }, 100);
+        // NE PAS initialiser le chart ici !
+        // L'initialisation se fait dans renderMessages après le rechargement de l'historique
       } else if (data.data_type === "table") {
         // Créer un tableau HTML
-        let tableHtml = '<table class="table table-striped">';
+        let tableId = 'table-' + Date.now();
+        let tableHtml = `<table id="${tableId}" class="table table-striped">`;
         tableHtml += '<thead><tr>';
         data.content.columns.forEach(column => {
           tableHtml += `<th>${column}</th>`;
@@ -510,6 +730,7 @@
         });
         tableHtml += '</tbody></table>';
         addMessageToChatBox(tableHtml, "bot", true);
+        addExportMenu(msgDiv, "table", tableId); // Ajout du menu d'export
       } else {
         addMessageToChatBox("Réponse inconnue", "bot");
       }
@@ -540,4 +761,498 @@
     chatBox.appendChild(messageDiv);
     chatBox.scrollTop = chatBox.scrollHeight;
   }
+
+  // Fonctions du système de chat - Fonctions globales
+  function selectChat(chatId, liElement) {
+    window.currentChatId = chatId;
+    console.log('selectChat appelé, currentChatId =', window.currentChatId);
+    // Sauvegarder l'ID du chat courant
+    localStorage.setItem('current_chat_id', chatId);
+    
+    // Highlight le chat sélectionné (seulement pour les chats dans l'historique)
+    document.querySelectorAll('.sidebar-chat-link.selected').forEach(el => el.classList.remove('selected'));
+    if (liElement) liElement.querySelector('.sidebar-chat-link').classList.add('selected');
+    
+    // Charge les messages
+    fetch(`/chats/${chatId}.json`)
+      .then(resp => resp.json())
+      .then(data => {
+        renderMessages(data.messages);
+        // Scroll en bas après affichage (sécurité, pour contenu dynamique)
+        const chatBox = document.getElementById('chat-box');
+        requestAnimationFrame(() => {
+          if (chatBox) chatBox.scrollTop = chatBox.scrollHeight;
+        });
+      })
+      .catch(() => {
+        const chatBox = document.getElementById('chat-box');
+        if (chatBox) chatBox.innerHTML = '<div class="chat-error">Erreur lors du chargement du chat</div>';
+      });
+  }
+
+  // Fonction globale pour charger les chats (accessible depuis partout)
+  function loadChats() {
+    const chatList = document.getElementById('sidebar-chat-history');
+    if (!chatList) return;
+    
+    fetch('/chats.json')
+      .then(response => response.json())
+      .then(chats => {
+        chatList.innerHTML = '';
+        if (chats.length === 0) {
+          chatList.innerHTML = '<li class="sidebar-chat-empty">Aucun chat pour le moment</li>';
+          return;
+        }
+        
+        chats.forEach(chat => {
+          const li = document.createElement('li');
+          const link = document.createElement('a');
+          link.href = '#';
+          link.className = 'sidebar-chat-link';
+          // Ajout icône style ChatGPT
+          const icon = document.createElement('span');
+          icon.className = 'chatgpt-icon';
+          icon.innerHTML = '<i class="fas fa-message"></i>';
+          link.appendChild(icon);
+          // Titre du chat
+          const title = document.createElement('span');
+          title.textContent = chat.title && chat.title.trim() !== '' ? chat.title : `Chat du ${new Date(chat.created_at).toLocaleDateString()}`;
+          title.className = 'sidebar-chat-title';
+          link.appendChild(title);
+          // Icône crayon pour édition
+          const editBtn = document.createElement('button');
+          editBtn.innerHTML = '<i class="fas fa-pen"></i>';
+          editBtn.className = 'sidebar-chat-edit-btn';
+          editBtn.title = 'Renommer ce chat';
+          editBtn.type = 'button';
+          editBtn.onclick = function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            startEditChatTitle(title, chat.id);
+          };
+          link.appendChild(editBtn);
+          // Ajout du bouton de suppression juste après le titre et le crayon
+          const delBtn = document.createElement('button');
+          delBtn.innerHTML = '<i class="fas fa-trash"></i>';
+          delBtn.className = 'sidebar-chat-delete-btn';
+          delBtn.title = 'Supprimer ce chat';
+          delBtn.onclick = function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('Tentative de suppression du chat:', chat);
+            console.log('Chat ID:', chat.id);
+            console.log('Type de chat.id:', typeof chat.id);
+            console.log('URL de suppression:', `/chats/${chat.id}`);
+            
+            // Vérification que l'ID existe
+            if (!chat.id) {
+              console.error('Erreur: chat.id est undefined ou null');
+              alert('Erreur: Impossible de supprimer ce chat (ID manquant)');
+              return;
+            }
+            
+            if (confirm('Supprimer ce chat ?')) {
+              const deleteUrl = `/chats/${chat.id}`;
+              console.log('URL finale:', deleteUrl);
+              
+              // Essayer d'abord avec DELETE, sinon utiliser POST avec _method
+              fetch(deleteUrl, { 
+                method: 'DELETE', 
+                headers: { 
+                  'X-CSRF-Token': document.querySelector('meta[name=\'csrf-token\']').content,
+                  'Content-Type': 'application/json',
+                  'Accept': 'application/json',
+                  'Cache-Control': 'no-cache'
+                },
+                credentials: 'same-origin'
+              })
+              .catch(error => {
+                console.log('DELETE échoué, essai avec POST + _method');
+                // Fallback: utiliser POST avec _method=DELETE
+                const formData = new FormData();
+                formData.append('_method', 'DELETE');
+                
+                return fetch(deleteUrl, {
+                  method: 'POST',
+                  headers: {
+                    'X-CSRF-Token': document.querySelector('meta[name=\'csrf-token\']').content,
+                    'Accept': 'application/json'
+                  },
+                  body: formData,
+                  credentials: 'same-origin'
+                });
+              })
+              .then(resp => {
+                console.log('Réponse du serveur:', resp);
+                console.log('Status:', resp.status);
+                console.log('URL de la réponse:', resp.url);
+                console.log('Headers:', resp.headers);
+                
+                // Essayer de lire le contenu de la réponse
+                return resp.text().then(text => {
+                  console.log('Contenu de la réponse:', text);
+                  return { response: resp, text: text };
+                });
+              })
+              .then(({ response, text }) => {
+                if (response.ok) {
+                  console.log('Chat supprimé avec succès');
+                  // Si le chat supprimé était le chat actuel, vider la zone de chat
+                  if (window.currentChatId === chat.id) {
+                    window.currentChatId = null;
+                    localStorage.removeItem('current_chat_id');
+                    const chatBox = document.getElementById('chat-box');
+                    if (chatBox) {
+                      chatBox.innerHTML = '<div class="chat-empty">Sélectionnez un chat pour commencer</div>';
+                    }
+                  }
+                  loadChats(); // Recharger la liste des chats
+                } else {
+                  console.error('Erreur lors de la suppression, status:', response.status);
+                  console.error('Contenu de l\'erreur:', text);
+                  alert('Erreur lors de la suppression du chat');
+                }
+              })
+              .catch(error => {
+                console.error('Erreur réseau:', error);
+                alert('Erreur réseau lors de la suppression');
+              });
+            }
+          };
+          link.appendChild(delBtn);
+          link.addEventListener('click', function(e) {
+            e.preventDefault();
+            selectChat(chat.id, li);
+          });
+          // Si ce chat est le chat courant, on le met en avant
+          if (window.currentChatId && chat.id == window.currentChatId) {
+            link.classList.add('selected');
+          }
+          li.appendChild(link);
+          chatList.appendChild(li);
+        });
+      })
+      .catch(error => {
+        chatList.innerHTML = '<li class="sidebar-chat-error">Erreur lors du chargement</li>';
+        console.error('Erreur chargement chats:', error);
+      });
+  }
+
+  function initChatSystem() {
+    const chatList = document.getElementById('sidebar-chat-history');
+    const newChatBtn = document.getElementById('new-chat-btn');
+
+    if (chatList) loadChats();
+
+    if (newChatBtn) {
+      newChatBtn.addEventListener('click', function() {
+        // Créer un chat vide (ne sera pas dans l'historique)
+        fetch('/chats/create_empty', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-Token': document.querySelector('meta[name=\'csrf-token\']').content
+          }
+        })
+        .then(resp => resp.json())
+        .then(chat => {
+          console.log('Nouveau chat vide créé:', chat);
+          // Mettre à jour l'ID du chat actuel
+          window.currentChatId = chat.id;
+          localStorage.setItem('current_chat_id', chat.id);
+          
+          // Vider la zone de chat pour le nouveau chat
+          const chatBox = document.getElementById('chat-box');
+          if (chatBox) {
+            chatBox.innerHTML = '<div class="chat-empty">Nouveau chat - Tapez votre message pour commencer</div>';
+          }
+          
+          // Recharger la liste des chats pour inclure le nouveau
+          const chatList = document.getElementById('sidebar-chat-history');
+          if (chatList) {
+            loadChats();
+          }
+          // Forcer la sélection du nouveau chat
+          selectChat(chat.id);
+        })
+        .catch(error => {
+          console.error('Erreur lors de la création du chat vide:', error);
+          alert('Erreur lors de la création du chat');
+        });
+      });
+    }
+  }
+
+  function startEditChatTitle(titleSpan, chatId) {
+    const oldTitle = titleSpan.textContent;
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.value = oldTitle;
+    input.className = 'sidebar-chat-title-input';
+    input.style.width = (titleSpan.offsetWidth + 30) + 'px';
+    titleSpan.replaceWith(input);
+    input.focus();
+    input.select();
+    // Sauvegarde au blur ou Entrée
+    function save() {
+      const newTitle = input.value.trim();
+      if (newTitle && newTitle !== oldTitle) {
+        fetch(`/chats/${chatId}`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content
+          },
+          body: JSON.stringify({ chat: { title: newTitle } })
+        })
+        .then(resp => resp.json())
+        .then(() => {
+          loadChats(); // Rafraîchir la liste
+          // Ouvre le chat renommé dans la chat area
+          selectChat(chatId);
+        });
+      } else {
+        // Annuler
+        cancel();
+      }
+    }
+    function cancel() {
+      input.replaceWith(titleSpan);
+    }
+    input.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') save();
+      if (e.key === 'Escape') cancel();
+    });
+    input.addEventListener('blur', save);
+  }
+
+  // Ajoute SheetJS (xlsx) si pas déjà présent
+  if (typeof XLSX === 'undefined') {
+    const script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js';
+    document.head.appendChild(script);
+  }
+
+  // Ajoute un menu d'export contextuel sur chaque visualisation
+  function addExportMenu(messageElement, type, targetId) {
+    const menuBtn = document.createElement("button");
+    menuBtn.innerHTML = '<i class="fas fa-ellipsis-vertical"></i>';
+    menuBtn.className = "export-menu-btn";
+    menuBtn.style.position = "absolute";
+    menuBtn.style.top = "8px";
+    menuBtn.style.right = "8px";
+    menuBtn.style.background = "none";
+    menuBtn.style.border = "none";
+    menuBtn.style.cursor = "pointer";
+    menuBtn.style.color = "#555";
+    menuBtn.style.zIndex = "10";
+
+    const menu = document.createElement("div");
+    menu.className = "export-menu";
+    menu.style.position = "absolute";
+    menu.style.top = "36px";
+    menu.style.right = "-160px";
+    menu.style.background = "#fff";
+    menu.style.color = "#222";
+    menu.style.border = "1px solid #ccc";
+    menu.style.borderRadius = "10px";
+    menu.style.boxShadow = "0 2px 8px rgba(0,0,0,0.15)";
+    menu.style.display = "none";
+    menu.style.minWidth = "140px";
+    menu.style.fontSize = "1rem";
+    menu.style.zIndex = "1000";
+
+    // PDF
+    const pdfOption = document.createElement("div");
+    pdfOption.textContent = "Télécharger en PDF";
+    pdfOption.className = "export-menu-item";
+    pdfOption.style.padding = "10px";
+    pdfOption.style.cursor = "pointer";
+    pdfOption.onmouseover = () => pdfOption.style.background = "#eee";
+    pdfOption.onmouseout = () => pdfOption.style.background = "none";
+    pdfOption.onclick = function() {
+      menu.style.display = "none";
+      if (type === "chart") {
+        exportChartAsPDF(targetId);
+      } else if (type === "table") {
+        exportTableAsPDF(targetId);
+      }
+    };
+    menu.appendChild(pdfOption);
+
+    // PNG
+    const pngOption = document.createElement("div");
+    pngOption.textContent = "Télécharger en PNG";
+    pngOption.className = "export-menu-item";
+    pngOption.style.padding = "10px";
+    pngOption.style.cursor = "pointer";
+    pngOption.onmouseover = () => pngOption.style.background = "#eee";
+    pngOption.onmouseout = () => pngOption.style.background = "none";
+    pngOption.onclick = function() {
+      menu.style.display = "none";
+      if (type === "chart") {
+        exportChartAsPNG(targetId);
+      } else if (type === "table") {
+        exportTableAsPNG(targetId);
+      }
+    };
+    menu.appendChild(pngOption);
+
+    // CSV
+    const csvOption = document.createElement("div");
+    csvOption.textContent = "Télécharger en CSV";
+    csvOption.className = "export-menu-item";
+    csvOption.style.padding = "10px";
+    csvOption.style.cursor = "pointer";
+    csvOption.onmouseover = () => csvOption.style.background = "#eee";
+    csvOption.onmouseout = () => csvOption.style.background = "none";
+    csvOption.onclick = function() {
+      menu.style.display = "none";
+      if (type === "chart") {
+        exportChartAsCSV(targetId);
+      } else if (type === "table") {
+        exportTableAsCSV(targetId);
+      }
+    };
+    menu.appendChild(csvOption);
+
+    // Excel
+    const excelOption = document.createElement("div");
+    excelOption.textContent = "Télécharger en Excel";
+    excelOption.className = "export-menu-item";
+    excelOption.style.padding = "10px";
+    excelOption.style.cursor = "pointer";
+    excelOption.onmouseover = () => excelOption.style.background = "#eee";
+    excelOption.onmouseout = () => excelOption.style.background = "none";
+    excelOption.onclick = function() {
+      menu.style.display = "none";
+      if (type === "chart") {
+        exportChartAsExcel(targetId);
+      } else if (type === "table") {
+        exportTableAsExcel(targetId);
+      }
+    };
+    menu.appendChild(excelOption);
+
+    menuBtn.onclick = function(e) {
+      e.stopPropagation();
+      menu.style.display = menu.style.display === "none" ? "block" : "none";
+    };
+    document.addEventListener("click", function() {
+      menu.style.display = "none";
+    });
+
+    const bubble = messageElement.querySelector('.bubble');
+    if (bubble) {
+      bubble.appendChild(menuBtn);
+      bubble.appendChild(menu);
+    } else {
+      messageElement.appendChild(menuBtn);
+      messageElement.appendChild(menu);
+    }
+  }
+
+  function exportChartAsPDF(chartId) {
+    const chartCanvas = document.getElementById(chartId);
+    html2canvas(chartCanvas, { scale: 2 }).then(canvas => {
+      const imgData = canvas.toDataURL("image/png");
+      const pdf = new jspdf.jsPDF("landscape");
+      pdf.addImage(imgData, "PNG", 10, 10, 280, 160);
+      pdf.save("chart.pdf");
+    });
+  }
+  function exportChartAsPNG(chartId) {
+    const chartCanvas = document.getElementById(chartId);
+    html2canvas(chartCanvas, { scale: 2 }).then(canvas => {
+      const link = document.createElement("a");
+      link.href = canvas.toDataURL("image/png");
+      link.download = "chart.png";
+      link.click();
+    });
+  }
+  function exportChartAsCSV(chartId) {
+    const chart = Chart.getChart(chartId);
+    if (!chart) return;
+    let csv = [];
+    let header = ["Label", ...chart.data.datasets.map(ds => ds.label || "Série")];
+    csv.push(header.join(","));
+    chart.data.labels.forEach((label, i) => {
+      let row = [label];
+      chart.data.datasets.forEach(ds => {
+        row.push(ds.data[i]);
+      });
+      csv.push(row.join(","));
+    });
+    const csvContent = csv.join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "chart.csv";
+    link.click();
+  }
+  function exportChartAsExcel(chartId) {
+    const chart = Chart.getChart(chartId);
+    if (!chart || typeof XLSX === 'undefined') return;
+    let ws_data = [];
+    let header = ["Label", ...chart.data.datasets.map(ds => ds.label || "Série")];
+    ws_data.push(header);
+    chart.data.labels.forEach((label, i) => {
+      let row = [label];
+      chart.data.datasets.forEach(ds => {
+        row.push(ds.data[i]);
+      });
+      ws_data.push(row);
+    });
+    const ws = XLSX.utils.aoa_to_sheet(ws_data);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Chart");
+    XLSX.writeFile(wb, "chart.xlsx");
+  }
+  function exportTableAsPDF(tableId) {
+    const table = document.getElementById(tableId);
+    html2canvas(table, { scale: 2 }).then(canvas => {
+      const imgData = canvas.toDataURL("image/png");
+      const pdf = new jspdf.jsPDF("landscape");
+      pdf.addImage(imgData, "PNG", 10, 10, 280, 160);
+      pdf.save("table.pdf");
+    });
+  }
+  function exportTableAsPNG(tableId) {
+    const table = document.getElementById(tableId);
+    html2canvas(table, { scale: 2 }).then(canvas => {
+      const link = document.createElement("a");
+      link.href = canvas.toDataURL("image/png");
+      link.download = "table.png";
+      link.click();
+    });
+  }
+  function exportTableAsCSV(tableId) {
+    const table = document.getElementById(tableId);
+    let csv = [];
+    for (let row of table.rows) {
+      let rowData = [];
+      for (let cell of row.cells) {
+        rowData.push('"' + cell.innerText.replace(/"/g, '""') + '"');
+      }
+      csv.push(rowData.join(","));
+    }
+    const csvContent = csv.join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "table.csv";
+    link.click();
+  }
+  function exportTableAsExcel(tableId) {
+    if (typeof XLSX === 'undefined') return;
+    const table = document.getElementById(tableId);
+    const wb = XLSX.utils.table_to_book(table, {sheet: "Table"});
+    XLSX.writeFile(wb, "table.xlsx");
+  }
 </script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+</body>
+</html>
