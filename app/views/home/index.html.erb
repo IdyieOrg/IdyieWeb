@@ -16,9 +16,9 @@
     <ul class="sidebar-menu">
       <li><%= link_to raw('<i class="fas fa-cog"></i> Paramètres'), '#', id: 'openSettingsModal', class: 'sidebar-menu-link', data: { turbo: false } %></li>
       <li>
-        <a href="#" id="new-chat-btn" class="sidebar-menu-link">
+        <button id="new-chat-btn" class="sidebar-menu-link" style="background: none; border: none; width: 100%; text-align: left; padding: 12px 32px; color: inherit; text-decoration: none;">
           <i class="fas fa-plus"></i> Nouvelle requête
-        </a>
+        </button>
       </li>
       <li>
         <button id="toggle-history-btn" class="sidebar-history-toggle">
@@ -401,6 +401,8 @@
         // Fonction pour envoyer le message une fois qu'un chat est disponible
         function sendMessage() {
           if (value && window.currentChatId) {
+            // Afficher le message utilisateur immédiatement
+            addMessageToChatBox(value, 'user');
             console.log('Envoi du message à', `/chats/${window.currentChatId}/messages`);
             fetch(`/chats/${window.currentChatId}/messages`, {
               method: 'POST',
@@ -420,7 +422,6 @@
               if (!localStorage.getItem('current_chat_id')) {
                 localStorage.setItem('current_chat_id', window.currentChatId);
               }
-              selectChat(window.currentChatId);
               // Recharger l'historique des chats car le chat a maintenant des messages
               const chatList = document.getElementById('sidebar-chat-history');
               if (chatList) {
@@ -493,7 +494,6 @@
               })
               .then(resp => resp.json())
               .then(() => {
-                selectChat(window.currentChatId);
               });
           })
           .catch(() => {
@@ -603,15 +603,6 @@
     const msgDiv = document.createElement('div');
     msgDiv.className = 'message ' + (sender === 'user' ? 'user' : 'bot');
 
-    // Avatar pour le bot
-    let avatar = null;
-    if (sender === 'bot') {
-      avatar = document.createElement('img');
-      avatar.className = 'avatar';
-      avatar.src = 'logo_idyie.png';
-      avatar.alt = 'Bot';
-    }
-
     // Bulle
     const bubble = document.createElement('div');
     bubble.className = 'bubble';
@@ -621,21 +612,71 @@
       bubble.textContent = content;
     }
 
-    if (sender === 'bot') {
-      msgDiv.appendChild(avatar);
-      msgDiv.appendChild(bubble);
-    } else {
-      msgDiv.appendChild(bubble);
+    msgDiv.appendChild(bubble);
+
+    // Ajout du menu d'export si chart/table
+    if (isHtml && typeof content === 'string') {
+      if (content.trim().startsWith('<canvas')) {
+        // Récupérer l'id du canvas
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = content;
+        const canvas = tempDiv.querySelector('canvas[data-chart]');
+        if (canvas) {
+          addExportMenu(msgDiv, 'chart', canvas.id);
+        }
+      } else if (content.trim().startsWith('<table')) {
+        // Récupérer l'id du tableau
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = content;
+        const table = tempDiv.querySelector('table');
+        if (table) {
+          addExportMenu(msgDiv, 'table', table.id);
+        }
+      }
     }
 
     return msgDiv;
   }
 
+  // Fonction pour initialiser les charts dans un conteneur
+  function initializeChartsInContainer(container) {
+    container.querySelectorAll('canvas[data-chart]').forEach(canvas => {
+      if (canvas && typeof canvas.getContext === 'function') {
+        try {
+          const chartData = JSON.parse(canvas.getAttribute('data-chart'));
+          console.log('Initialisation Chart.js sur', canvas, 'avec data:', chartData);
+          new Chart(canvas.getContext('2d'), chartData);
+        } catch (e) {
+          console.error('Erreur lors de l\'initialisation du chart:', {
+            canvas,
+            dataChart: canvas.getAttribute('data-chart'),
+            error: e
+          });
+        }
+      } else {
+        console.warn('Canvas non valide ou getContext non disponible:', canvas);
+      }
+    });
+  }
+
   // Affichage immédiat d'un message (user ou bot)
   function addMessageToChatBox(content, sender, isHtml = false) {
     const chatBox = document.getElementById("chat-box");
+    
+    // Supprimer le message "Nouveau chat" si présent
+    const emptyChatMessage = chatBox.querySelector('.chat-empty');
+    if (emptyChatMessage && emptyChatMessage.textContent.includes('Nouveau chat')) {
+      emptyChatMessage.remove();
+    }
+    
     const msgDiv = createMessageElement(content, sender, isHtml);
     chatBox.appendChild(msgDiv);
+    
+    // Initialiser les charts immédiatement si c'est un message HTML
+    if (isHtml) {
+      initializeChartsInContainer(msgDiv);
+    }
+    
     chatBox.scrollTop = chatBox.scrollHeight;
   }
 
@@ -655,45 +696,11 @@
       );
       const msgDiv = createMessageElement(msg.content, msg.role, isHtml);
       chatBox.appendChild(msgDiv);
-
-      // Ajout du menu d'export pour les charts
-      if (isHtml && msg.content.trim().startsWith('<canvas')) {
-        const tempDiv = document.createElement('div');
-        tempDiv.innerHTML = msg.content;
-        const canvas = tempDiv.querySelector('canvas[data-chart]');
-        if (canvas) {
-          addExportMenu(msgDiv, "chart", canvas.id);
-        }
-      }
-      // Ajout du menu d'export pour les tables
-      if (isHtml && msg.content.trim().startsWith('<table')) {
-        const tempDiv = document.createElement('div');
-        tempDiv.innerHTML = msg.content;
-        const table = tempDiv.querySelector('table');
-        if (table) {
-          addExportMenu(msgDiv, "table", table.id);
-        }
-      }
     });
+    
     // Initialiser les charts APRÈS le rendu DOM
-    chatBox.querySelectorAll('canvas[data-chart]').forEach(canvas => {
-      if (canvas && typeof canvas.getContext === 'function') {
-        try {
-          const chartData = JSON.parse(canvas.getAttribute('data-chart'));
-          console.log('Initialisation Chart.js sur', canvas, 'avec data:', chartData);
-          new Chart(canvas.getContext('2d'), chartData);
-          // addExportMenu(msgDiv, "chart", canvas.id); // Ajout du menu d'export - Déjà fait dans renderMessages
-        } catch (e) {
-          console.error('Erreur lors de l\'initialisation du chart:', {
-            canvas,
-            dataChart: canvas.getAttribute('data-chart'),
-            error: e
-          });
-        }
-      } else {
-        console.warn('Canvas non valide ou getContext non disponible:', canvas);
-      }
-    });
+    initializeChartsInContainer(chatBox);
+    
     // Scroll en bas
     requestAnimationFrame(() => {
       chatBox.scrollTop = chatBox.scrollHeight;
@@ -967,13 +974,8 @@
             chatBox.innerHTML = '<div class="chat-empty">Nouveau chat - Tapez votre message pour commencer</div>';
           }
           
-          // Recharger la liste des chats pour inclure le nouveau
-          const chatList = document.getElementById('sidebar-chat-history');
-          if (chatList) {
-            loadChats();
-          }
-          // Forcer la sélection du nouveau chat
-          selectChat(chat.id);
+          // NE PAS recharger la liste des chats car ce chat vide ne doit pas apparaître dans l'historique
+          // NE PAS appeler selectChat() car cela ferait un appel réseau inutile pour un chat vide
         })
         .catch(error => {
           console.error('Erreur lors de la création du chat vide:', error);
@@ -1008,8 +1010,9 @@
         .then(resp => resp.json())
         .then(() => {
           loadChats(); // Rafraîchir la liste
-          // Ouvre le chat renommé dans la chat area
-          selectChat(chatId);
+          if (window.currentChatId !== chatId) {
+            selectChat(chatId);
+          }
         });
       } else {
         // Annuler
