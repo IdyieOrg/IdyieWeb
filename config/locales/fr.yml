@@ -1,0 +1,6 @@
+fr:
+  errors:
+    chat_creation_failed: "Erreur lors de la création du chat"
+    chat_deletion_failed: "Erreur lors de la suppression du chat"
+  notices:
+    chat_deleted: "Chat supprimé avec succès"
