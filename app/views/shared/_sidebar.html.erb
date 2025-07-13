@@ -1,0 +1,24 @@
+<div id="sidebar" class="sidebar">
+  <button id="closeSidebar" style="position:absolute;top:18px;right:18px;background:none;border:none;color:#fff;font-size:1.5rem;cursor:pointer;z-index:101;">
+    <i class="fas fa-xmark"></i>
+  </button>
+  <h2 class="sidebar-title fondamento-regular">Idyie</h2>
+  <hr>
+  <ul class="sidebar-menu">
+    <li><%= link_to raw('<i class="fas fa-cog"></i> Paramètres'), '#', id: 'openSettingsModal', class: 'sidebar-menu-link', data: { turbo: false } %></li>
+    <li>
+      <button id="new-chat-btn" class="sidebar-menu-link" style="background: none; border: none; width: 100%; text-align: left; padding: 12px 32px; color: inherit; text-decoration: none;">
+        <i class="fas fa-plus"></i> Nouvelle requête
+      </button>
+    </li>
+    <li>
+      <button id="toggle-history-btn" class="sidebar-history-toggle">
+        <span><i class="fas fa-history"></i> Historique</span>
+        <span id="history-arrow" class="sidebar-history-arrow">&#9660;</span>
+      </button>
+    </li>
+  </ul>
+  <ul id="sidebar-chat-history" class="sidebar-chat-history"></ul>
+  <hr class="sidebar-bottom-hr">
+  <%= button_to raw('<i class="fas fa-sign-out-alt"></i> Déconnexion'), destroy_user_session_path, method: :delete, class: 'sidebar-logout' %>
+</div> 
