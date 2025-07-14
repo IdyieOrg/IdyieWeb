@@ -11,13 +11,10 @@
         <i class="fas fa-plus"></i> Nouvelle requête
       </button>
     </li>
-    <li>
-      <button id="toggle-history-btn" class="sidebar-history-toggle">
-        <span><i class="fas fa-history"></i> Historique</span>
-        <span id="history-arrow" class="sidebar-history-arrow">&#9660;</span>
-      </button>
-    </li>
   </ul>
+  <div class="sidebar-chat-search-container">
+    <input type="text" id="sidebar-chat-search" class="sidebar-chat-search" placeholder="Rechercher un chat..." autocomplete="off" />
+  </div>
   <ul id="sidebar-chat-history" class="sidebar-chat-history"></ul>
   <hr class="sidebar-bottom-hr">
   <%= button_to raw('<i class="fas fa-sign-out-alt"></i> Déconnexion'), destroy_user_session_path, method: :delete, class: 'sidebar-logout' %>

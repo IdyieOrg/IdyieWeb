@@ -42,6 +42,7 @@ class ChatsController < ApplicationController
   def update
     @chat = current_user.chats.find(params[:id])
     if @chat.update(chat_params)
+      @chat.touch if chat_params[:title].present?
       render json: @chat
     else
       render json: { errors: @chat.errors.full_messages }, status: :unprocessable_entity

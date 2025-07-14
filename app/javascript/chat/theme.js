@@ -1,5 +1,3 @@
-// Fonctions de gestion du thème (dark/light)
-
 export function initTheme() {
   const savedTheme = localStorage.getItem('idyie_theme') || 'dark';
   document.documentElement.setAttribute('data-theme', savedTheme);

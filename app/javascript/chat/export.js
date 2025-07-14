@@ -1,5 +1,4 @@
 import { getCSRFToken, uniqueId, scrollToBottom, isHtmlContent } from './utils.js';
-// Fonctions d'export pour charts et tables
 
 export function addExportMenu(messageElement, type, targetId) {
   const menuBtn = document.createElement("button");
@@ -29,7 +28,6 @@ export function addExportMenu(messageElement, type, targetId) {
   menu.style.fontSize = "1rem";
   menu.style.zIndex = "1000";
 
-  // PDF
   const pdfOption = document.createElement("div");
   pdfOption.textContent = "Télécharger en PDF";
   pdfOption.className = "export-menu-item";
@@ -47,7 +45,6 @@ export function addExportMenu(messageElement, type, targetId) {
   };
   menu.appendChild(pdfOption);
 
-  // PNG
   const pngOption = document.createElement("div");
   pngOption.textContent = "Télécharger en PNG";
   pngOption.className = "export-menu-item";
@@ -65,7 +62,6 @@ export function addExportMenu(messageElement, type, targetId) {
   };
   menu.appendChild(pngOption);
 
-  // CSV
   const csvOption = document.createElement("div");
   csvOption.textContent = "Télécharger en CSV";
   csvOption.className = "export-menu-item";
@@ -83,7 +79,6 @@ export function addExportMenu(messageElement, type, targetId) {
   };
   menu.appendChild(csvOption);
 
-  // Excel
   const excelOption = document.createElement("div");
   excelOption.textContent = "Télécharger en Excel";
   excelOption.className = "export-menu-item";

@@ -7,7 +7,16 @@ class MessagesController < ApplicationController
 
     if @message.persisted?
       update_chat_has_messages_if_first
-      render json: @message, status: :created
+      @chat.touch
+      render json: {
+        id: @message.id,
+        chat_id: @chat.id,
+        chat_title: @chat.title,
+        chat_created_at: @chat.created_at,
+        role: @message.role,
+        content: @message.content,
+        created_at: @message.created_at
+      }, status: :created
     else
       render json: { error: 'Erreur lors de la création du message', details: @message.errors.full_messages },
              status: :unprocessable_entity

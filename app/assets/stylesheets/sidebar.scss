@@ -1,0 +1,368 @@
+// SIDEBAR
+.sidebar {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 250px;
+  height: 100vh;
+  background: var(--sidebar-bg);
+  color: var(--sidebar-color);
+  box-shadow: 2px 0 16px rgba(0,0,0,0.18);
+  z-index: 1051;
+  display: flex;
+  flex-direction: column;
+  transition: left 0.3s cubic-bezier(.4,0,.2,1);
+}
+.sidebar.closed {
+  left: -250px;
+}
+
+.sidebar-title {
+  text-align: center;
+  margin-top: 20px;
+  font-size: 3rem;
+  margin-bottom: 18px;
+  color: var(--sidebar-title-color);
+}
+
+.sidebar-menu {
+  list-style: none;
+  padding: 0 0 0 0;
+  margin: 0 0 24px 0;
+}
+.sidebar-menu li {
+  margin: 0;
+}
+.sidebar-menu a {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--sidebar-color);
+  text-decoration: none;
+  padding: 12px 32px;
+  font-size: 1.08rem;
+  border-left: 3px solid transparent;
+  transition: background 0.18s, color 0.18s, border-color 0.18s;
+}
+.sidebar-menu a:hover {
+  background: var(--sidebar-menu-hover);
+  color: var(--accent-color);
+  border-left: 3px solid var(--accent-color);
+}
+
+.sidebar-bottom-hr {
+  margin-top: auto;
+  margin-bottom: 12px;
+  border-color: var(--sidebar-color);
+}
+
+.sidebar-logout,
+.sidebar-logout button {
+  border: none !important;
+  background: none;
+  color: var(--sidebar-logout-color);
+  padding: 12px 32px;
+  font-weight: 500;
+  font-size: 1.08rem;
+  width: 100%;
+  text-align: left;
+  border-left: 3px solid transparent;
+  transition: background 0.18s, color 0.18s, border-color 0.18s;
+}
+.sidebar-logout button:hover {
+  background: var(--sidebar-menu-hover);
+  color: var(--sidebar-logout-color);
+  border-left: 3px solid var(--sidebar-logout-color);
+}
+
+// HISTORIQUE DES CHATS
+.sidebar-chat-history {
+  max-height: none;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 0 0.5rem;
+  opacity: 1;
+  margin-top: 10px;
+}
+
+.sidebar-chat-history li {
+  list-style: none;
+  margin: 8px 0;
+}
+
+.sidebar-chat-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  border-radius: 8px;
+  background: none;
+  color: #222;
+  text-decoration: none;
+  font-size: 1.04rem;
+  transition: background 0.18s, color 0.18s;
+  cursor: pointer;
+  position: relative;
+  opacity: 0;
+  transform: translateY(10px);
+  animation: chat-fade-in 0.3s ease-out forwards;
+}
+
+.sidebar-chat-link:nth-child(1) { animation-delay: 0s; }
+.sidebar-chat-link:nth-child(2) { animation-delay: 0.1s; }
+.sidebar-chat-link:nth-child(3) { animation-delay: 0.2s; }
+.sidebar-chat-link:nth-child(4) { animation-delay: 0.3s; }
+.sidebar-chat-link:nth-child(5) { animation-delay: 0.4s; }
+.sidebar-chat-link:nth-child(6) { animation-delay: 0.5s; }
+.sidebar-chat-link:nth-child(7) { animation-delay: 0.6s; }
+.sidebar-chat-link:nth-child(8) { animation-delay: 0.7s; }
+.sidebar-chat-link:nth-child(9) { animation-delay: 0.8s; }
+.sidebar-chat-link:nth-child(10) { animation-delay: 0.9s; }
+.sidebar-chat-link:nth-child(11) { animation-delay: 1.0s; }
+.sidebar-chat-link:nth-child(12) { animation-delay: 1.1s; }
+.sidebar-chat-link:nth-child(13) { animation-delay: 1.2s; }
+.sidebar-chat-link:nth-child(14) { animation-delay: 1.3s; }
+.sidebar-chat-link:nth-child(15) { animation-delay: 1.4s; }
+
+.sidebar-chat-link .chatgpt-icon {
+  font-size: 1.15em;
+  color: #7FFFAB;
+  flex-shrink: 0;
+}
+
+.sidebar-chat-link:hover {
+  background: #e9ecef;
+  color: #155b91;
+}
+
+.sidebar-chat-link.selected {
+  background: #155b91;
+  color: #fff;
+  font-weight: 600;
+}
+
+.sidebar-chat-delete-btn {
+  background: none;
+  border: none;
+  color: #bbb;
+  font-size: 1.1em;
+  margin-left: auto;
+  cursor: pointer;
+  padding: 0 6px;
+  transition: color 0.18s;
+}
+
+.sidebar-chat-link.selected .sidebar-chat-delete-btn {
+  color: #fff;
+}
+
+.sidebar-chat-delete-btn:hover {
+  color: #e74c3c;
+}
+
+.sidebar-chat-edit-btn {
+  background: none;
+  border: none;
+  color: #bbb;
+  font-size: 1em;
+  margin-left: 6px;
+  cursor: pointer;
+  padding: 0 4px;
+  transition: color 0.18s;
+}
+
+.sidebar-chat-link.selected .sidebar-chat-edit-btn {
+  color: #fff;
+}
+
+.sidebar-chat-edit-btn:hover {
+  color: #155b91;
+}
+
+.sidebar-chat-title {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sidebar-chat-title-input {
+  font-size: 1.04rem;
+  border: 1px solid #bbb;
+  border-radius: 6px;
+  padding: 4px 8px;
+  outline: none;
+  width: 90%;
+  box-sizing: border-box;
+  background: #fff;
+  color: #222;
+  font-family: inherit;
+  overflow-x: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.sidebar-chat-empty, .sidebar-chat-error {
+  color: #888;
+  text-align: center;
+  padding: 18px 0;
+  font-size: 1.01rem;
+}
+
+// SKELETON LOADING
+.chat-skeleton {
+  padding: 0 0.5rem;
+}
+
+.skeleton-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  margin: 8px 0;
+  border-radius: 8px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s infinite;
+  opacity: 0;
+  transform: translateY(10px);
+  animation: skeleton-loading 1.5s infinite, skeleton-fade-in 0.3s ease-out forwards;
+}
+
+.skeleton-item:nth-child(1) { animation-delay: 0s, 0s; }
+.skeleton-item:nth-child(2) { animation-delay: 0s, 0.1s; }
+.skeleton-item:nth-child(3) { animation-delay: 0s, 0.2s; }
+.skeleton-item:nth-child(4) { animation-delay: 0s, 0.3s; }
+.skeleton-item:nth-child(5) { animation-delay: 0s, 0.4s; }
+.skeleton-item:nth-child(6) { animation-delay: 0s, 0.5s; }
+.skeleton-item:nth-child(7) { animation-delay: 0s, 0.6s; }
+.skeleton-item:nth-child(8) { animation-delay: 0s, 0.7s; }
+.skeleton-item:nth-child(9) { animation-delay: 0s, 0.8s; }
+.skeleton-item:nth-child(10) { animation-delay: 0s, 0.9s; }
+.skeleton-item:nth-child(11) { animation-delay: 0s, 1.0s; }
+.skeleton-item:nth-child(12) { animation-delay: 0s, 1.1s; }
+.skeleton-item:nth-child(13) { animation-delay: 0s, 1.2s; }
+.skeleton-item:nth-child(14) { animation-delay: 0s, 1.3s; }
+.skeleton-item:nth-child(15) { animation-delay: 0s, 1.4s; }
+
+.skeleton-icon {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #ddd;
+  flex-shrink: 0;
+}
+
+.skeleton-title {
+  height: 16px;
+  border-radius: 4px;
+  background: #ddd;
+  flex: 1;
+  min-width: 0;
+}
+
+.skeleton-actions {
+  display: flex;
+  gap: 4px;
+  margin-left: auto;
+}
+
+.skeleton-action {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  background: #ddd;
+}
+
+@keyframes skeleton-loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+@keyframes skeleton-fade-in {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes chat-fade-in {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+[data-theme="dark"] .skeleton-item {
+  background: linear-gradient(90deg, #333 25%, #444 50%, #333 75%);
+  background-size: 200% 100%;
+}
+
+[data-theme="dark"] .skeleton-icon,
+[data-theme="dark"] .skeleton-title,
+[data-theme="dark"] .skeleton-action {
+  background: #555;
+}
+
+/* Scrollbar custom optionnel */
+.sidebar-chat-history::-webkit-scrollbar {
+  width: 7px;
+}
+
+.sidebar-chat-history::-webkit-scrollbar-thumb {
+  background: #e0e0e0;
+  border-radius: 4px;
+}
+
+
+
+// BOUTON FERMETURE SIDEBAR
+#closeSidebar {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 1.5rem;
+  cursor: pointer;
+  z-index: 101;
+} 
+
+.sidebar-chat-search-container {
+  position: sticky;
+  top: 0;
+  background: var(--sidebar-bg);
+  z-index: 20;
+  padding: 10px 0 6px 0;
+}
+
+.sidebar-chat-search {
+  width: 90%;
+  margin: 0 auto;
+  display: block;
+  padding: 7px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--input-border);
+  background: var(--input-bg);
+  color: var(--input-color);
+  font-size: 1rem;
+  outline: none;
+  transition: border 0.2s;
+}
+.sidebar-chat-search:focus {
+  border-color: var(--accent-color);
+} 

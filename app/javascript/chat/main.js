@@ -10,22 +10,20 @@ import {
     loadChats,
     initChatSystem,
     startEditChatTitle,
-
+    createSidebarChatElement,
+    moveChatToTop
   } from './chat.js';
 import { attachSidebarHandlers } from './sidebar.js';
 import { initTheme, toggleTheme } from './theme.js';
 import { getCSRFToken, uniqueId, scrollToBottom, isHtmlContent } from './utils.js';
 import { attachModalHandlers } from './modal.js';
 
-  // Variables globales
   if (typeof window.currentChatId === 'undefined') {
     window.currentChatId = null;
   }
-  // const currentChatId = window.currentChatId; // SUPPRIMÉ pour éviter l'erreur Turbo
   
   console.log('Prompt: Script loaded');
 
-  // Check if DOM is already loaded
   if (document.readyState === 'loading') {
     console.log('Prompt: DOM still loading, waiting for DOMContentLoaded');
     document.addEventListener('DOMContentLoaded', function() {
@@ -40,21 +38,64 @@ import { attachModalHandlers } from './modal.js';
   function initPromptPage() {
     console.log('Prompt: Initializing prompt page functionality');
 
-    // Initialiser le thème en premier
-    // const savedTheme = localStorage.getItem('idyie_theme') || 'dark';
-    // document.documentElement.setAttribute('data-theme', savedTheme);
-    // console.log('Prompt: Theme set to:', savedTheme);
-
-    // === THEME ===
     initTheme();
 
-    // === SIDEBAR ===
     attachSidebarHandlers();
     
-    // === MODAL PARAMÈTRES ===
     attachModalHandlers();
 
-    // Initialisation de la reconnaissance vocale
+    (function setupSidebarChatSearch() {
+      const searchInput = document.getElementById('sidebar-chat-search');
+      const chatList = document.getElementById('sidebar-chat-history');
+      if (!searchInput || !chatList) return;
+
+      let initialOrder = [];
+      function saveInitialOrder() {
+        initialOrder = Array.from(chatList.children).map(li => li.getAttribute('data-chat-id'));
+      }
+      function restoreInitialOrder() {
+      }
+
+      searchInput.addEventListener('input', function(e) {
+        const query = searchInput.value.trim().toLowerCase();
+        const lis = Array.from(chatList.children).filter(li => li.getAttribute('data-chat-id'));
+        if (!query) {
+          lis.forEach(li => li.style.display = '');
+          return;
+          }
+        const scored = lis.map(li => {
+          const title = li.querySelector('.sidebar-chat-title')?.textContent?.toLowerCase() || '';
+          let score = 0;
+          if (title.startsWith(query)) score = 2;
+          else if (title.includes(query)) score = 1;
+          return { li, score, title };
+        }).filter(obj => obj.score > 0);
+        scored.sort((a, b) => b.score - a.score || a.title.localeCompare(b.title));
+        scored.forEach(obj => chatList.appendChild(obj.li));
+        lis.forEach(li => {
+          if (!scored.find(obj => obj.li === li)) li.style.display = 'none';
+          else li.style.display = '';
+        });
+      });
+
+      chatList.addEventListener('click', function(e) {
+        const link = e.target.closest('.sidebar-chat-link');
+        if (!link) return;
+        const li = link.closest('li[data-chat-id]');
+        if (!li) return;
+        if (searchInput.value.trim()) {
+          chatList.querySelectorAll('.sidebar-chat-link.selected').forEach(el => el.classList.remove('selected'));
+          link.classList.add('selected');
+        }
+    });
+
+      searchInput.addEventListener('blur', function() {
+        if (!searchInput.value.trim()) {
+          Array.from(chatList.children).forEach(li => li.style.display = '');
+        }
+      });
+    })();
+
     if ('webkitSpeechRecognition' in window) {
       const recognition = new webkitSpeechRecognition();
       recognition.continuous = false;
@@ -96,7 +137,7 @@ import { attachModalHandlers } from './modal.js';
         alert("L'API Web Speech n'est pas supportée par ce navigateur.");
     }
 
-    // Gestion du formulaire avec AJAX pour la réponse bot
+
     const promptForm = document.querySelector('.prompt-input-bar');
     if (promptForm) {
       promptForm.addEventListener('submit', function(e) {
@@ -107,10 +148,9 @@ import { attachModalHandlers } from './modal.js';
         console.log('currentChatId:', window.currentChatId);
         console.log('input value:', value);
         
-        // Fonction pour envoyer le message une fois qu'un chat est disponible
+
         function sendMessage() {
           if (value && window.currentChatId) {
-            // Afficher le message utilisateur immédiatement
             addMessageToChatBox(value, 'user');
             console.log('Envoi du message à', `/chats/${window.currentChatId}/messages`);
             fetch(`/chats/${window.currentChatId}/messages`, {
@@ -127,21 +167,37 @@ import { attachModalHandlers } from './modal.js';
             })
             .then(data => {
               console.log('Données reçues:', data);
-              // Sauvegarder l'ID du chat dans localStorage après le premier message !
               if (!localStorage.getItem('current_chat_id')) {
                 localStorage.setItem('current_chat_id', window.currentChatId);
               }
-              // Recharger l'historique des chats car le chat a maintenant des messages
               const chatList = document.getElementById('sidebar-chat-history');
+              const chatId = data.chat_id || window.currentChatId;
+              if (chatList && chatId && !chatList.querySelector(`[data-chat-id='${chatId}']`)) {
+                chatList.querySelectorAll('.sidebar-chat-link.selected').forEach(el => el.classList.remove('selected'));
+                const chat = {
+                  id: chatId,
+                  title: data.chat_title || 'Nouveau chat',
+                  created_at: data.chat_created_at || new Date().toISOString()
+                };
+                const li = createSidebarChatElement(chat);
+                chatList.prepend(li);
+                li.querySelector('.sidebar-chat-link').classList.add('selected');
+              }
+              if (typeof moveChatToTop === 'function') {
+                moveChatToTop(chatId);
+              }
+              const searchInput = document.getElementById('sidebar-chat-search');
+              if (searchInput && searchInput.value.trim()) {
+                searchInput.value = '';
               if (chatList) {
-                loadChats();
+                  Array.from(chatList.children).forEach(li => li.style.display = '');
+                }
               }
             })
             .catch(err => {
               console.error('Erreur lors du fetch:', err);
             });
           input.value = '';
-          // Appel AJAX pour la réponse bot
           fetch('/prompts/send_to_api', {
             method: 'POST',
             headers: {
@@ -152,7 +208,6 @@ import { attachModalHandlers } from './modal.js';
           })
           .then(response => response.json())
           .then(response => {
-            // Traitement de la réponse
               let botContent = null;
             try {
               const data = JSON.parse(response.data);
@@ -161,7 +216,7 @@ import { attachModalHandlers } from './modal.js';
               } else if (data.data_type === "barChart") {
                 const canvasId = uniqueId('chart-');
                 const chartConfig = JSON.stringify(data.content);
-                console.log('Chart data reçu avant affichage:', data.content); // Ajout du log ici
+                console.log('Chart data reçu avant affichage:', data.content);
                 botContent = `<canvas id="${canvasId}" width="400" height="200" data-chart='${chartConfig.replace(/'/g, "&apos;")}'></canvas>`;
               } else if (data.data_type === "table") {
                 let tableId = uniqueId('table-');
@@ -186,13 +241,11 @@ import { attachModalHandlers } from './modal.js';
             } catch (e) {
                 botContent = "Erreur de traitement de la réponse";
               }
-              // Affichage live immédiat (avant sauvegarde)
               const isHtml = typeof botContent === 'string' && (
                 botContent.trim().startsWith('<canvas') ||
                 botContent.trim().startsWith('<table')
               );
               addMessageToChatBox(botContent, 'bot', isHtml);
-              // 2. Sauvegarde la réponse bot côté serveur
               fetch(`/chats/${window.currentChatId}/messages`, {
                 method: 'POST',
                 headers: {
@@ -220,25 +273,29 @@ import { attachModalHandlers } from './modal.js';
             });
           } else if (value && !window.currentChatId) {
             console.log('Aucun chat disponible, création d\'un nouveau chat...');
-            // Créer un nouveau chat et envoyer le message
             createNewEmptyChat().then((chat) => {
-              window.currentChatId = chat.id; // MAJ ici
+              window.currentChatId = chat.id;
+              const chatList = document.getElementById('sidebar-chat-history');
+              console.log('[DEBUG] Tentative d\'ajout local du chat', chat);
+              if (chatList && !chatList.querySelector(`[data-chat-id='${chat.id}']`)) {
+                const li = createSidebarChatElement(chat);
+                chatList.prepend(li);
+                console.log('[DEBUG] Chat ajouté localement au DOM', chat);
+              } else {
+                console.log('[DEBUG] Chat déjà présent dans la liste ou chatList introuvable', chat);
+              }
               console.log('Chat créé, envoi du message...');
-              sendMessage(); // Rappel récursif, mais currentChatId est bien défini
+              sendMessage();
           });
+            return;
         }
         }
-        
-        // Appeler la fonction d'envoi
         sendMessage();
       });
     }
 
-    // DEBUG: observer pour détecter la fermeture de la sidebar
-    // Initialisation du système de chat
     initChatSystem();
 
-    // Charger le chat sauvegardé ou créer un nouveau chat
     const savedChatId = localStorage.getItem('current_chat_id');
     if (savedChatId) {
       selectChat(savedChatId);
@@ -246,23 +303,9 @@ import { attachModalHandlers } from './modal.js';
       createNewEmptyChat();
     }
 
-    // Toggle historique
-    const toggleHistoryBtn = document.getElementById('toggle-history-btn');
-    const chatHistory = document.getElementById('sidebar-chat-history');
-    const historyArrow = document.getElementById('history-arrow');
-    let historyCollapsed = false;
-    if (toggleHistoryBtn && chatHistory && historyArrow) {
-      toggleHistoryBtn.addEventListener('click', function() {
-        historyCollapsed = !historyCollapsed;
-        chatHistory.classList.toggle('collapsed', historyCollapsed);
-        historyArrow.classList.toggle('collapsed', historyCollapsed);
-      });
-    }
-
     console.log('Prompt: Prompt page initialization complete');
   }
 
-  // Ajoute SheetJS (xlsx) si pas déjà présent
   if (typeof XLSX === 'undefined') {
     const script = document.createElement('script');
     script.src = 'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js';

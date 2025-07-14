@@ -1,5 +1,3 @@
-// Fonctions de gestion du modal de paramètres
-
 export function openSettingsHandler(e) {
   console.log('openSettingsHandler called');
   const modalEl = document.getElementById('settingsModal');
@@ -21,7 +19,6 @@ export function openSettingsHandler(e) {
 }
 
 export function attachModalHandlers() {
-  // Bouton d'ouverture du modal
   const openSettingsBtn = document.getElementById('openSettingsModal');
   if (openSettingsBtn) {
     console.log('Attaching openSettingsHandler to openSettingsBtn');
@@ -31,14 +28,12 @@ export function attachModalHandlers() {
     console.log('openSettingsBtn NOT found');
   }
 
-  // Persistance de l'onglet actif du modal
   document.querySelectorAll('#settingsMenu .nav-link').forEach(function(tab) {
     tab.addEventListener('shown.bs.tab', function(e) {
       localStorage.setItem('settings_modal_active_tab', e.target.id);
     });
   });
 
-  // Réouverture automatique du modal si besoin
   var myModalEl = document.getElementById('settingsModal');
   if (myModalEl && localStorage.getItem('settings_modal_open') === 'true') {
     var myModal = new bootstrap.Modal(myModalEl);
@@ -49,7 +44,6 @@ export function attachModalHandlers() {
       if (promptPage) promptPage.classList.remove('modal-opened');
       localStorage.setItem('settings_modal_open', 'false');
     }, { once: true });
-    // Restaure l'onglet actif du modal si besoin
     var lastActiveTabId = localStorage.getItem('settings_modal_active_tab');
     if (lastActiveTabId) {
       var lastActiveTab = document.getElementById(lastActiveTabId);
