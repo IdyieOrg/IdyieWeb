@@ -8,3 +8,4 @@ pin_all_from 'app/javascript/controllers', under: 'controllers'
 
 pin_all_from 'app/javascript/lib', under: 'lib'
 pin_all_from 'app/javascript/vendor', under: 'vendor'
+pin_all_from 'app/javascript/chat', under: 'chat'

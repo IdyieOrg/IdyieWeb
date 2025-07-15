@@ -1,15 +1,13 @@
-
-
 <%= form_for(resource, as: resource_name, url: session_path(resource_name)) do |f| %>
 <div class="login-page">
   <div class="login-container">
     <div class="theme-selector">
-      <button type="button" class="theme-btn" id="dark-theme" title="Mode sombre">
+      <%= button_tag(type: "button", class: "theme-btn", id: "dark-theme", title: "Mode sombre") do %>
         <i class="fas fa-moon"></i>
-      </button>
-      <button type="button" class="theme-btn" id="light-theme" title="Mode clair">
+      <% end %>
+      <%= button_tag(type: "button", class: "theme-btn", id: "light-theme", title: "Mode clair") do %>
         <i class="fas fa-sun"></i>
-      </button>
+      <% end %>
     </div>
 
     <div class="title">
@@ -28,22 +26,31 @@
         <%= f.password_field :password, class: "input", style: "padding-right: 40px;", placeholder: "password", id: "password", required: true %>
         <i class="fas fa-eye-slash eye-icon" id="togglePassword"></i>
       </div>
+      <% if devise_mapping.recoverable? %>
+        <div class="form-group" style="text-align: right; margin-top: -10px;">
+          <%= button_tag "Forgot your password?", type: "button", class: "forgot-password", data: { bs_toggle: "modal", bs_target: "#forgotPasswordModal" } %>
+        </div>
+      <% end %>
     </div>
-
-    <% if devise_mapping.rememberable? %>
-      <div class="field">
-        <%= f.check_box :remember_me %>
-        <%= f.label :remember_me %>
-      </div>
-    <% end %>
 
     <div class="form-group">
       <%= f.submit "Log in", class: "custom-btn login-btn" %>
+      <% if devise_mapping.rememberable? %>
+        <div class="remember">
+          <%= f.check_box :remember_me %>
+          <%= f.label :remember_me, style: "margin-top: 6px;" %>
+        </div>
+      <% end %>
     </div>
 
-    <div class="form-group">
-      <%= render "devise/shared/links" %>
-    </div>
+    <div class="divider">OR</div>
+
+    <% if devise_mapping.registerable? %>
+      <div class="form-group" style="text-align: center; margin-top: 10px;">
+        <%= link_to "Sign up", new_registration_path(resource_name), class: "custom-btn login-btn" %>
+      </div>
+    <% end %>
+
   </div>
 </div>
 <% end %>
@@ -65,5 +72,50 @@
       eyeIcon.classList.toggle('fa-eye-slash', !isPassword);
       eyeIcon.classList.toggle('fa-eye', isPassword);
     });
+
+    var forgotModal = document.getElementById('forgotPasswordModal');
+    if (forgotModal) {
+      forgotModal.addEventListener('show.bs.modal', function () {
+        localStorage.setItem('forgot_modal_open', '1');
+      });
+      forgotModal.addEventListener('hide.bs.modal', function () {
+        localStorage.removeItem('forgot_modal_open');
+      });
+      if (localStorage.getItem('forgot_modal_open') === '1') {
+        var modal = new bootstrap.Modal(forgotModal);
+        modal.show();
+      }
+    }
   });
 </script>
+
+<div class="modal fade" id="forgotPasswordModal" tabindex="-1" aria-labelledby="forgotPasswordModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content forgot-password-modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="forgotPasswordModalLabel">Forgot your password?</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <%= form_for(resource, as: resource_name, url: password_path(resource_name), html: { method: :post }) do |f| %>
+          <%= render "devise/shared/error_messages", resource: resource %>
+          <div class="form-group">
+            <%= f.label :email, "Email" %>
+            <%= f.email_field :email, autofocus: true, autocomplete: "email", class: "input", placeholder: "firstname.lastname@mail.com", required: true %>
+          </div>
+          <div class="actions">
+            <%= f.submit "Send me reset password instructions", class: "custom-btn login-btn send-instruction-btn" %>
+          </div>
+        <% end %>
+      </div>
+      <div class="modal-footer" style="display: flex; justify-content: space-between; align-items: center; border-top: none; background: none; padding: 0 8px 0 8px; margin-top: 18px;">
+        <%= link_to new_session_path(resource_name), class: "back-link", style:"padding-bottom: 10px; margin-left: -10px;" do %>
+          <i class="fas fa-arrow-left"></i> Go back to Login page
+        <% end %>
+        <%= link_to new_registration_path(resource_name), class: "back-link", style:"padding-bottom: 10px; margin-right: -10px;" do %>
+          Go to Sign up page <i class="fas fa-arrow-right"></i>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>

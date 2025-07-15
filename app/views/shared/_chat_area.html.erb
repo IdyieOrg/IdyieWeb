@@ -1,0 +1,15 @@
+<div class="main-content">
+  <div class="chat-area">
+    <div id="chat-box" class="chat-box"></div>
+  </div>
+
+  <%= form_with url: '#', method: :post, html: { class: "prompt-input-bar", autocomplete: "off" } do %>
+    <%= button_tag type: "button", class: "mic-btn", tabindex: "-1" do %>
+      <i class="icone-mic fas fa-microphone" id="microphone"></i>
+    <% end %>
+
+    <%= text_field_tag "search[query]", nil, class: "prompt-input", placeholder: "Tapez votre requête ici", autocomplete: "off" %>
+
+    <%= button_tag "Envoyer", type: "submit", id: "prompt", class: "send-btn" %>
+  <% end %>
+</div>

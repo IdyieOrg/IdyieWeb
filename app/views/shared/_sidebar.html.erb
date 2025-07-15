@@ -1,0 +1,27 @@
+<div id="sidebar" class="sidebar">
+  <div class="sidebar-inner">
+    <%= button_tag type: 'button', id: 'closeSidebar', class: 'close-sidebar-btn' do %>
+      <i class="icon-close fas fa-xmark"></i>
+    <% end %>
+    <h2 class="sidebar-title fondamento-regular">Idyie</h2>
+    <hr class="sidebar-top-hr">
+    <ul class="sidebar-menu">
+      <li><%= link_to raw('<i class="fas fa-cog"></i> Paramètres'), '#', id: 'openSettingsModal', class: 'sidebar-menu-link', data: { turbo: false } %></li>
+      <li>
+        <%= button_tag type: 'button', id: 'new-chat-btn', class: 'sidebar-menu-button' do %>
+          <i class="fas fa-plus"></i> Nouveau Chat
+        <% end %>
+      </li>
+    </ul>
+    <div class="sidebar-chat-search-container">
+        <%= text_field_tag :sidebar_chat_search, nil, 
+                            id: 'sidebar-chat-search', 
+                            class: 'sidebar-chat-search', 
+                            placeholder: 'Rechercher un chat...', 
+                            autocomplete: 'off' %>
+    </div>
+    <ul id="sidebar-chat-history" class="sidebar-chat-history"></ul>
+  </div>
+  <hr class="sidebar-bottom-hr">
+  <%= button_to raw('<i class="fas fa-sign-out-alt"></i> Déconnexion'), destroy_user_session_path, method: :delete, class: 'sidebar-logout' %>
+</div> 
