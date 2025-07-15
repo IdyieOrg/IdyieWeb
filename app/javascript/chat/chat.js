@@ -17,10 +17,12 @@ export function createSidebarChatElement(chat) {
   const link = document.createElement('a');
   link.href = '#';
   link.className = 'sidebar-chat-link';
-  const icon = document.createElement('span');
-  icon.className = 'chatgpt-icon';
-  icon.innerHTML = '<i class="fas fa-message"></i>';
-  link.appendChild(icon);
+
+  // const icon = document.createElement('span');
+  // icon.className = 'chatgpt-icon';
+  // icon.innerHTML = '<i class="fas fa-message"></i>';
+  // link.appendChild(icon);
+  
   const title = document.createElement('span');
   title.textContent = chat.title && chat.title.trim() !== '' ? chat.title : `Chat du ${new Date(chat.created_at).toLocaleDateString()}`;
   title.className = 'sidebar-chat-title';
@@ -414,7 +416,7 @@ export function startEditChatTitle(titleSpan, chatId) {
   input.type = 'text';
   input.value = oldTitle;
   input.className = 'sidebar-chat-title-input';
-  input.style.width = (titleSpan.offsetWidth + 30) + 'px';
+  input.style.width = (titleSpan.offsetWidth) + 'px';
   titleSpan.replaceWith(input);
   input.focus();
   input.select();

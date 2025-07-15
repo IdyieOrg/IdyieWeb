@@ -35,6 +35,10 @@
 .menu-btn:hover {
   background: var(--menu-btn-hover);
 }
+.menu-btn:active {
+  transform: scale(0.9);
+  background: var(--menu-btn-active) !important; /* optionnel si tu as une couleur différente */
+}
 
 // MAIN CONTENT
 .main-content {

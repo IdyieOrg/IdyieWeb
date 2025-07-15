@@ -1,4 +1,4 @@
-// SIDEBAR
+// Sidebar styles
 .sidebar {
   position: fixed;
   left: 0;
@@ -7,28 +7,83 @@
   height: 100vh;
   background: var(--sidebar-bg);
   color: var(--sidebar-color);
-  box-shadow: 2px 0 16px rgba(0,0,0,0.18);
+  box-shadow: 2px 0 16px rgba(0, 0, 0, 0.2);
   z-index: 1051;
   display: flex;
   flex-direction: column;
   transition: left 0.3s cubic-bezier(.4,0,.2,1);
-}
-.sidebar.closed {
-  left: -250px;
+  // border: 1px solid var(--sidebar-border);
+  border-radius: 0px 10px 10px 0px;
 }
 
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between; /* Distribue contenu + logout */
+}
+
+.sidebar-inner {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+
+// Sidebar toggle close button
+.icone-close {
+  font-size: 1.5rem;
+  color: var(--sidebar-color) !important;
+}
+.close-sidebar-btn {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  z-index: 10;
+  width: 40px;
+  height: 40px;
+  background: var(--menu-btn-bg);
+  border: none;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--menu-btn-color) !important;
+  font-size: 1.5rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.close-sidebar-btn:hover {
+  background: var(--menu-btn-hover) !important;
+}
+.close-sidebar-btn:active {
+  transform: scale(0.9);
+  background: var(--menu-btn-active) !important; /* optionnel si tu as une couleur différente */
+}
+
+// Sidebar title
 .sidebar-title {
   text-align: center;
-  margin-top: 20px;
-  font-size: 3rem;
-  margin-bottom: 18px;
+  margin-top: 15px;
+  font-size: 2.5rem;
+  margin-bottom: -5px;
   color: var(--sidebar-title-color);
 }
 
+// Sidebar top horizontal rule
+// This is the horizontal line at the top of the sidebar
+.sidebar-top-hr {
+  margin: 15px 0 0px 0;
+  border: none;
+  border-top: 1px solid var(--sidebar-color);
+}
+
+// Sidebar menu styles
+// This is the list of links in the sidebar
 .sidebar-menu {
   list-style: none;
-  padding: 0 0 0 0;
-  margin: 0 0 24px 0;
+  padding: 0;
+  margin: 0;
 }
 .sidebar-menu li {
   margin: 0;
@@ -42,54 +97,140 @@
   padding: 12px 32px;
   font-size: 1.08rem;
   border-left: 3px solid transparent;
-  transition: background 0.18s, color 0.18s, border-color 0.18s;
+  transition: background 0.18s,
+              color 0.18s,
+              border-color 0.18s,
+              transform 0.03s ease;
 }
 .sidebar-menu a:hover {
   background: var(--sidebar-menu-hover);
   color: var(--accent-color);
   border-left: 3px solid var(--accent-color);
+  // transform: translateX(3px);
+}
+.sidebar-menu a:active {
+  transform: scale(0.95);
 }
 
-.sidebar-bottom-hr {
-  margin-top: auto;
-  margin-bottom: 12px;
-  border-color: var(--sidebar-color);
-}
-
-.sidebar-logout,
-.sidebar-logout button {
-  border: none !important;
+.sidebar-menu-button {
   background: none;
-  color: var(--sidebar-logout-color);
-  padding: 12px 32px;
-  font-weight: 500;
-  font-size: 1.08rem;
+  border: none;
   width: 100%;
   text-align: left;
+  padding: 12px 32px;
+  color: var(--sidebar-color);
+  text-decoration: none;
+  font-size: 1.08rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
   border-left: 3px solid transparent;
-  transition: background 0.18s, color 0.18s, border-color 0.18s;
+  transition: background 0.18s, transform 0.05s ease, border-color 0.18s;
 }
-.sidebar-logout button:hover {
+.sidebar-menu-button:hover {
   background: var(--sidebar-menu-hover);
-  color: var(--sidebar-logout-color);
-  border-left: 3px solid var(--sidebar-logout-color);
+  color: var(--accent-color);
+  border-left: 3px solid var(--accent-color);
+  // transform: translateX(3px);
+}
+.sidebar-menu-button:active {
+  transform: scale(0.95);
 }
 
-// HISTORIQUE DES CHATS
+// Sidebar search container
+// This is the container for the chat search input at the top of the sidebar
+.sidebar-chat-search-container {
+  position: sticky;
+  top: 0;
+  background: var(--sidebar-bg);
+  z-index: 20;
+  padding: 10px 0 6px 0;
+}
+
+// Sidebar chat search input
+// This is the input field for searching through chats in the sidebar
+.sidebar-chat-search {
+  width: 90%;
+  margin: 0 auto;
+  display: block;
+  padding: 7px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--input-border);
+  background: var(--input-bg);
+  color: var(--input-color);
+  font-size: 1rem;
+  outline: none;
+  transition: border 0.2s;
+}
+.sidebar-chat-search:focus {
+  border-color: var(--accent-color);
+} 
+
+// Sidebar chat history
 .sidebar-chat-history {
   max-height: none;
   overflow-y: auto;
   overflow-x: hidden;
   padding: 0 0.5rem;
   opacity: 1;
-  margin-top: 10px;
+  margin-top: 5px;
+  margin-bottom: 0px;
 }
-
 .sidebar-chat-history li {
   list-style: none;
   margin: 8px 0;
 }
 
+// Sidebar chat link history
+.sidebar-chat-title {
+  align-items: flex-start;
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+// Sidebar chat edit button
+// This button allows users to edit the title of a chat in the sidebar
+.sidebar-chat-edit-btn {
+  background: none;
+  border: none;
+  color: #bbb;
+  font-size: 1em;
+  margin-left: 6px;
+  cursor: pointer;
+  padding: 0 0px;
+  transition: color 0.18s;
+}
+.sidebar-chat-edit-btn:hover {
+  color: var(--accent-color);
+}
+
+// Sidebar chat link
+.sidebar-chat-link.selected {
+  background: var(--modal-menu-hover);
+  color: var(--modal-color);
+  font-weight: 600;
+}
+.sidebar-chat-delete-btn {
+  background: none;
+  border: none;
+  color: #bbb;
+  font-size: 1.1em;
+  margin-left: auto;
+  cursor: pointer;
+  padding: 0 6px;
+  transition: color 0.18s;
+}
+.sidebar-chat-delete-btn:hover {
+  color: var(--sidebar-logout-color);
+}
+.sidebar-chat-link:hover {
+  background: var(--sidebar-chat-link-hover);
+  color: var(--test-secondary);
+}
 .sidebar-chat-link {
   display: flex;
   align-items: center;
@@ -97,7 +238,7 @@
   padding: 10px 16px;
   border-radius: 8px;
   background: none;
-  color: #222;
+  color: var(--text-primary);
   text-decoration: none;
   font-size: 1.04rem;
   transition: background 0.18s, color 0.18s;
@@ -107,7 +248,6 @@
   transform: translateY(10px);
   animation: chat-fade-in 0.3s ease-out forwards;
 }
-
 .sidebar-chat-link:nth-child(1) { animation-delay: 0s; }
 .sidebar-chat-link:nth-child(2) { animation-delay: 0.1s; }
 .sidebar-chat-link:nth-child(3) { animation-delay: 0.2s; }
@@ -124,83 +264,63 @@
 .sidebar-chat-link:nth-child(14) { animation-delay: 1.3s; }
 .sidebar-chat-link:nth-child(15) { animation-delay: 1.4s; }
 
-.sidebar-chat-link .chatgpt-icon {
-  font-size: 1.15em;
-  color: #7FFFAB;
-  flex-shrink: 0;
-}
 
-.sidebar-chat-link:hover {
-  background: #e9ecef;
-  color: #155b91;
-}
 
-.sidebar-chat-link.selected {
-  background: #155b91;
-  color: #fff;
-  font-weight: 600;
-}
-
-.sidebar-chat-delete-btn {
-  background: none;
-  border: none;
-  color: #bbb;
-  font-size: 1.1em;
-  margin-left: auto;
-  cursor: pointer;
-  padding: 0 6px;
-  transition: color 0.18s;
-}
-
-.sidebar-chat-link.selected .sidebar-chat-delete-btn {
-  color: #fff;
-}
-
-.sidebar-chat-delete-btn:hover {
-  color: #e74c3c;
-}
-
-.sidebar-chat-edit-btn {
-  background: none;
-  border: none;
-  color: #bbb;
-  font-size: 1em;
-  margin-left: 6px;
-  cursor: pointer;
-  padding: 0 4px;
-  transition: color 0.18s;
-}
-
-.sidebar-chat-link.selected .sidebar-chat-edit-btn {
-  color: #fff;
-}
-
-.sidebar-chat-edit-btn:hover {
-  color: #155b91;
-}
-
-.sidebar-chat-title {
-  flex: 1 1 auto;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
+// Sidebar chat title input
 .sidebar-chat-title-input {
   font-size: 1.04rem;
-  border: 1px solid #bbb;
-  border-radius: 6px;
-  padding: 4px 8px;
+  border: 1px solid var(--input-border);
+  border-radius: 4px;
+  padding: 0px 0px;
   outline: none;
-  width: 90%;
+  width: 50%;
   box-sizing: border-box;
-  background: #fff;
-  color: #222;
+  background: var(--input-bg);
+  color: var(--text-primary);
   font-family: inherit;
   overflow-x: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
+}
+
+
+// Sidebar logout button
+.sidebar-logout,
+.sidebar-logout button {
+  border: none;
+  border-left: 3px solid transparent;
+  background: none;
+  color: var(--sidebar-logout-color);
+  padding: 12px 32px;
+  font-weight: 500;
+  font-size: 1.08rem;
+  width: 100%;
+  gap: 50px;
+  text-align: left;
+  border-left: 3px solid transparent !important;
+  transition: background 0.18s, color 0.18s, border-color 0.18s;
+}
+.sidebar-logout:hover,
+.sidebar-logout:focus {
+  border-left: 3px solid var(--sidebar-logout-color) !important;
+  background: var(--sidebar-menu-hover);
+  color: var(--sidebar-logout-color);
+}
+
+.sidebar-logout:active {
+  transform: scale(0.95);
+}
+
+// Sidebar bottom horizontal rule
+.sidebar-bottom-hr {
+  margin: 0px 0 0px 0;
+  border: none;
+  border-top: 1px solid var(--sidebar-color);
+}
+
+
+.sidebar.closed {
+  left: -250px;
 }
 
 .sidebar-chat-empty, .sidebar-chat-error {
@@ -327,8 +447,6 @@
   border-radius: 4px;
 }
 
-
-
 // BOUTON FERMETURE SIDEBAR
 #closeSidebar {
   position: absolute;
@@ -340,29 +458,4 @@
   font-size: 1.5rem;
   cursor: pointer;
   z-index: 101;
-} 
-
-.sidebar-chat-search-container {
-  position: sticky;
-  top: 0;
-  background: var(--sidebar-bg);
-  z-index: 20;
-  padding: 10px 0 6px 0;
-}
-
-.sidebar-chat-search {
-  width: 90%;
-  margin: 0 auto;
-  display: block;
-  padding: 7px 12px;
-  border-radius: 8px;
-  border: 1px solid var(--input-border);
-  background: var(--input-bg);
-  color: var(--input-color);
-  font-size: 1rem;
-  outline: none;
-  transition: border 0.2s;
-}
-.sidebar-chat-search:focus {
-  border-color: var(--accent-color);
 } 
