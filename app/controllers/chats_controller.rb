@@ -42,7 +42,8 @@ class ChatsController < ApplicationController
   def update
     @chat = current_user.chats.find(params[:id])
     if @chat.update(chat_params)
-      @chat.touch if chat_params[:title].present?
+      # Forcer la mise à jour de updated_at pour remonter le chat
+      @chat.touch if chat_params[:title].present? # rubocop:disable Rails/SkipsModelValidations
       render json: @chat
     else
       render json: { errors: @chat.errors.full_messages }, status: :unprocessable_entity

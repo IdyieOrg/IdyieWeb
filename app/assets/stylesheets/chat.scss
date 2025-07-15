@@ -1,3 +1,14 @@
+// MAIN CONTENT
+.main-content {
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  transition: padding 0.4s ease;
+}
+
 // CHAT AREA
 .chat-area {
   flex: 1 1 auto;
@@ -52,18 +63,26 @@
   transition: margin 0.3s cubic-bezier(.4,0,.2,1), transform 0.3s cubic-bezier(.4,0,.2,1);
 }
 
+.icone-mic {
+  font-size: 1.5rem;
+  color: var(--text-secondary) !important;
+}
+
 .mic-btn {
   background: none;
   border: none;
-  color: var(--mic-btn-color);
+  color: var(--mic-btn-color) !important;
   font-size: 1.3rem;
   cursor: pointer;
   padding: 0 8px;
   border-radius: 8px;
   transition: background 0.2s, color 0.2s;
 }
-.mic-btn:hover {
-  color: var(--mic-btn-hover);
+.icone-mic:hover {
+  color: var(--modal-border) !important;
+}
+.icone-mic:active, .icone-mic:focus {
+  color: var(--accent-color) !important;
 }
 
 .prompt-input {
@@ -93,6 +112,9 @@
   font-weight: 500;
   cursor: pointer;
   transition: background 0.2s, color 0.2s, border 0.2s;
+}
+.send-btn:active {
+  transform: scale(0.9);
 }
 .send-btn:hover, .send-btn:focus {
   background-color: var(--send-btn-hover);

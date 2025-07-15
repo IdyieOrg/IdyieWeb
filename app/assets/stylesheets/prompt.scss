@@ -40,17 +40,6 @@
   background: var(--menu-btn-active) !important; /* optionnel si tu as une couleur différente */
 }
 
-// MAIN CONTENT
-.main-content {
-  width: 100%;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  transition: padding 0.4s ease;
-}
-
 // LAYOUT STATES
 .prompt-page {
   padding-left: 250px;
