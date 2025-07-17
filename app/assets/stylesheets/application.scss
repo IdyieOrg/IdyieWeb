@@ -94,3 +94,19 @@
   --modal-close-color: #000000;
   --sidebar-chat-link-hover: #e9ecef;
 }
+
+.table th {
+  writing-mode: horizontal-tb !important;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 150px;
+}
+
+.table td {
+  writing-mode: horizontal-tb !important;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 150px;
+}

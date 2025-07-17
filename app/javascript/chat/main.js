@@ -21,7 +21,7 @@ import { attachModalHandlers } from './modal.js';
   if (typeof window.currentChatId === 'undefined') {
     window.currentChatId = null;
   }
-  
+
   console.log('Prompt: Script loaded');
 
   if (document.readyState === 'loading') {
@@ -41,7 +41,7 @@ import { attachModalHandlers } from './modal.js';
     initTheme();
 
     attachSidebarHandlers();
-    
+
     attachModalHandlers();
 
     (function setupSidebarChatSearch() {
@@ -147,7 +147,7 @@ import { attachModalHandlers } from './modal.js';
         console.log('SUBMIT TRIGGERED');
         console.log('currentChatId:', window.currentChatId);
         console.log('input value:', value);
-        
+
 
         function sendMessage() {
           if (value && window.currentChatId) {
@@ -208,7 +208,7 @@ import { attachModalHandlers } from './modal.js';
           })
           .then(response => response.json())
           .then(response => {
-              let botContent = null;
+            let botContent = null;
             try {
               const data = JSON.parse(response.data);
               if (Array.isArray(data)) {
@@ -226,17 +226,23 @@ import { attachModalHandlers } from './modal.js';
                   tableHtml += `<th>${column}</th>`;
                 });
                 tableHtml += '</tr></thead><tbody>';
+                let breakpoint = 10, i = 0;
                 data.content.rows.forEach(row => {
-                  tableHtml += '<tr>';
-                  row.forEach(cell => {
+                  if (i++ >= breakpoint) {
+                    tableHtml += `<tr style="display: none;">`;
+                  } else {
+                    tableHtml += '<tr>';
+                  }
+                  Object.values(row).forEach(cell => {
                     tableHtml += `<td>${cell}</td>`;
                   });
                   tableHtml += '</tr>';
                 });
+                tableHtml += `<tr class="no-print"><td>Et encore ${data.content.rows.length - breakpoint} lignes...</td></tr>`;
                 tableHtml += '</tbody></table>';
-                  botContent = tableHtml;
+                botContent = tableHtml;
               } else {
-                  botContent = "Réponse inconnue";
+                botContent = "Réponse inconnue";
               }
             } catch (e) {
                 botContent = "Erreur de traitement de la réponse";

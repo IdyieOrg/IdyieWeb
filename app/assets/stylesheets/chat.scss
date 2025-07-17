@@ -145,7 +145,8 @@
   border-radius: 16px;
   font-size: 1.05rem;
   box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-  max-width: 100%;
+  // max-width: 100%;
+  overflow-x: auto;
   position: relative;
 }
 .message.user .bubble {
@@ -202,4 +203,4 @@ canvas[data-chart] {
   border: 1px solid var(--border-color);
   border-radius: 8px;
   background: var(--bg-secondary);
-} 
+}

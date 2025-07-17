@@ -22,7 +22,7 @@ export function createSidebarChatElement(chat) {
   // icon.className = 'chatgpt-icon';
   // icon.innerHTML = '<i class="fas fa-message"></i>';
   // link.appendChild(icon);
-  
+
   const title = document.createElement('span');
   title.textContent = chat.title && chat.title.trim() !== '' ? chat.title : `Chat du ${new Date(chat.created_at).toLocaleDateString()}`;
   title.className = 'sidebar-chat-title';
@@ -54,9 +54,9 @@ export function createSidebarChatElement(chat) {
     }
     if (confirm('Supprimer ce chat ?')) {
       const deleteUrl = `/chats/${chat.id}`;
-      fetch(deleteUrl, { 
-        method: 'DELETE', 
-        headers: { 
+      fetch(deleteUrl, {
+        method: 'DELETE',
+        headers: {
           'X-CSRF-Token': getCSRFToken(),
           'Content-Type': 'application/json',
           'Accept': 'application/json',
@@ -266,6 +266,7 @@ export function renderMessages(messages) {
 }
 
 export function treatResponse(response) {
+  debugger;
   try {
     const data = JSON.parse(response.data);
     if (Array.isArray(data)) {
@@ -340,12 +341,12 @@ export function selectChat(chatId, liElement) {
 export function loadChats(callback) {
   const chatList = document.getElementById('sidebar-chat-history');
   if (!chatList) return;
-  
+
   const existingChats = chatList.querySelectorAll('.sidebar-chat-link');
   if (existingChats.length === 0) {
     showSkeletonLoading();
   }
-  
+
   fetch('/chats.json')
     .then(response => response.json())
     .then(chats => {
@@ -464,43 +465,43 @@ export function moveChatToTop(chatId) {
 function createSkeletonItem() {
   const skeletonItem = document.createElement('div');
   skeletonItem.className = 'skeleton-item';
-  
+
   const skeletonIcon = document.createElement('div');
   skeletonIcon.className = 'skeleton-icon';
-  
+
   const skeletonTitle = document.createElement('div');
   skeletonTitle.className = 'skeleton-title';
-  
+
   const skeletonActions = document.createElement('div');
   skeletonActions.className = 'skeleton-actions';
-  
+
   const skeletonEdit = document.createElement('div');
   skeletonEdit.className = 'skeleton-action';
-  
+
   const skeletonDelete = document.createElement('div');
   skeletonDelete.className = 'skeleton-action';
-  
+
   skeletonActions.appendChild(skeletonEdit);
   skeletonActions.appendChild(skeletonDelete);
-  
+
   skeletonItem.appendChild(skeletonIcon);
   skeletonItem.appendChild(skeletonTitle);
   skeletonItem.appendChild(skeletonActions);
-  
+
   return skeletonItem;
 }
 
 function showSkeletonLoading() {
   const chatList = document.getElementById('sidebar-chat-history');
   if (!chatList) return;
-  
+
   const skeletonContainer = document.createElement('div');
   skeletonContainer.className = 'chat-skeleton';
   skeletonContainer.id = 'chat-skeleton';
-  
+
   chatList.innerHTML = '';
   chatList.appendChild(skeletonContainer);
-  
+
   fetch('/chats.json')
     .then(response => response.json())
     .then(chats => {
@@ -516,7 +517,7 @@ function showSkeletonLoading() {
 function updateSkeletonCount(actualCount) {
   const skeletonContainer = document.getElementById('chat-skeleton');
   if (!skeletonContainer) return;
-  
+
   let skeletonCount;
   if (actualCount === 0) {
     skeletonCount = 1;
@@ -525,7 +526,7 @@ function updateSkeletonCount(actualCount) {
   } else {
     skeletonCount = 15;
   }
-  
+
   skeletonContainer.innerHTML = '';
   for (let i = 0; i < skeletonCount; i++) {
     const skeletonItem = createSkeletonItem();

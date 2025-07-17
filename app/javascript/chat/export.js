@@ -17,7 +17,7 @@ export function addExportMenu(messageElement, type, targetId) {
   menu.className = "export-menu";
   menu.style.position = "absolute";
   menu.style.top = "36px";
-  menu.style.right = "-160px";
+  menu.style.right = "-200px";
   menu.style.background = "#fff";
   menu.style.color = "#222";
   menu.style.border = "1px solid #ccc";
@@ -106,8 +106,14 @@ export function addExportMenu(messageElement, type, targetId) {
 
   const bubble = messageElement.querySelector('.bubble');
   if (bubble) {
-    bubble.appendChild(menuBtn);
-    bubble.appendChild(menu);
+    // bubble.appendChild(menu);
+    bubble.parentElement.style.position = "relative"; // Ensure the parent has relative positioning
+    menuBtn.style.position = "absolute";
+    menuBtn.style.top = "8px";
+    menuBtn.style.right = "-40px";
+    bubble.parentElement.appendChild(menuBtn);
+    menu.style.right = "-200px"; // Adjust menu position relative to the button
+    bubble.parentElement.appendChild(menu);
   } else {
     messageElement.appendChild(menuBtn);
     messageElement.appendChild(menu);
@@ -170,26 +176,53 @@ export function exportChartAsExcel(chartId) {
   XLSX.utils.book_append_sheet(wb, ws, "Chart");
   XLSX.writeFile(wb, "chart.xlsx");
 }
+
 export function exportTableAsPDF(tableId) {
   const table = document.getElementById(tableId);
+  const originalDisplay = Array.from(table.rows).map(row => row.style.display);
+  const noPrintRows = Array.from(table.querySelectorAll('tr.no-print'));
+  noPrintRows.forEach(row => row.style.display = 'none'); // Temporarily hide no-print rows
+  table.querySelectorAll('tr').forEach(row => row.style.display = 'table-row');
+
   html2canvas(table, { scale: 2 }).then(canvas => {
     const imgData = canvas.toDataURL("image/png");
     const pdf = new jspdf.jsPDF("landscape");
     pdf.addImage(imgData, "PNG", 10, 10, 280, 160);
     pdf.save("table.pdf");
+
+    table.querySelectorAll('tr').forEach((row, index) => {
+      row.style.display = originalDisplay[index];
+    });
+    noPrintRows.forEach(row => row.style.display = ''); // Restore no-print rows
   });
 }
+
 export function exportTableAsPNG(tableId) {
   const table = document.getElementById(tableId);
+  const originalDisplay = Array.from(table.rows).map(row => row.style.display);
+  const noPrintRows = Array.from(table.querySelectorAll('tr.no-print'));
+  noPrintRows.forEach(row => row.style.display = 'none'); // Temporarily hide no-print rows
+  table.querySelectorAll('tr').forEach(row => row.style.display = 'table-row');
+
   html2canvas(table, { scale: 2 }).then(canvas => {
     const link = document.createElement("a");
     link.href = canvas.toDataURL("image/png");
     link.download = "table.png";
     link.click();
+
+    table.querySelectorAll('tr').forEach((row, index) => {
+      row.style.display = originalDisplay[index];
+    });
+    noPrintRows.forEach(row => row.style.display = ''); // Restore no-print rows
   });
 }
+
 export function exportTableAsCSV(tableId) {
   const table = document.getElementById(tableId);
+  const originalDisplay = Array.from(table.rows).map(row => row.style.display);
+  const noPrintRows = Array.from(table.querySelectorAll('tr.no-print'));
+  noPrintRows.forEach(row => row.style.display = 'none'); // Temporarily hide no-print rows
+
   let csv = [];
   for (let row of table.rows) {
     let rowData = [];
@@ -204,10 +237,39 @@ export function exportTableAsCSV(tableId) {
   link.href = URL.createObjectURL(blob);
   link.download = "table.csv";
   link.click();
+
+  table.querySelectorAll('tr').forEach((row, index) => {
+    row.style.display = originalDisplay[index];
+  });
+  noPrintRows.forEach(row => row.style.display = ''); // Restore no-print rows
 }
+
 export function exportTableAsExcel(tableId) {
   if (typeof XLSX === 'undefined') return;
   const table = document.getElementById(tableId);
-  const wb = XLSX.utils.table_to_book(table, {sheet: "Table"});
+  const rows = Array.from(table.rows);
+  const originalDisplay = rows.map(row => row.style.display);
+  const noPrintRows = rows.filter(row => row.classList.contains('no-print'));
+  noPrintRows.forEach(row => row.style.display = 'none'); // Temporarily hide no-print rows
+
+  const ws_data = rows.map(row => {
+    var noneBefore = row.style.display === 'none';
+    if (noneBefore) {
+      row.style.display = ''; // Temporarily make hidden rows visible
+    }
+    const rowData = Array.from(row.cells).map(cell => cell.innerText);
+    if (noneBefore) {
+      row.style.display = 'none'; // Re-hide the rows after processing
+    }
+    return rowData;
+  });
+  const ws = XLSX.utils.aoa_to_sheet(ws_data);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "Table");
   XLSX.writeFile(wb, "table.xlsx");
-} 
+
+  table.querySelectorAll('tr').forEach((row, index) => {
+    row.style.display = originalDisplay[index];
+  });
+  noPrintRows.forEach(row => row.style.display = ''); // Restore no-print rows
+}
